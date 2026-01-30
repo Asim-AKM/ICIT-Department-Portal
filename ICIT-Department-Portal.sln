@@ -8,7 +8,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6970B612-7CF0-4BCF-8A0D-36FDABF29E85}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Packages.Props = Directory.Packages.Props
-		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{DCDD774E-E543-49F3-AC70-23A510C8929B}"
