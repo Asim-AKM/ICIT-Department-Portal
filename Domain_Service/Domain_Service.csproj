@@ -7,7 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
+    <Folder Include="Entities\FacultyModule\" />
+    <Folder Include="Entities\AnnouncementAndDownload\" />
+    <Folder Include="Entities\FYPPropsalModule\" />
+    <Folder Include="Entities\StudentModule\" />
+    <Folder Include="Entities\UserManagmentModule\" />
     <Folder Include="Enums\" />
     <Folder Include="RepoInterfaces\" />
   </ItemGroup>
