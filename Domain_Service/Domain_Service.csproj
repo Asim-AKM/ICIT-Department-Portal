@@ -7,12 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Enums\**" />
+    <EmbeddedResource Remove="Enums\**" />
+    <None Remove="Enums\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Entities\FacultyModule\" />
     <Folder Include="Entities\AnnouncementAndDownload\" />
     <Folder Include="Entities\FYPPropsalModule\" />
     <Folder Include="Entities\StudentModule\" />
     <Folder Include="Entities\UserManagmentModule\" />
-    <Folder Include="Enums\" />
     <Folder Include="RepoInterfaces\" />
   </ItemGroup>
 </Project>

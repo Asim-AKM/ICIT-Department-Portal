@@ -8,5 +8,9 @@ namespace Domain_Service.Entities.FYPPropsalModule
 {
     public class Project
     {
+        public Guid ProjectId { get; set; }
+        public String Title { get; set; } = string.Empty;
+        public Guid FacultyId { get; set; } 
+        public ICollection<Proposal> Proposals { get; set; } 
     }
 }
