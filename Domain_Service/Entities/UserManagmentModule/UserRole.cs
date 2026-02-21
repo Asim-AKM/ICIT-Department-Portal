@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain_Service.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,8 @@ namespace Domain_Service.Entities.UserManagmentModule
 {
     public class UserRole
     {
+        public Guid  UserRoleId { get; set; }
+        public Guid  UserId { get; set; }
+        public RoleType RoleName { get; set; }
     }
 }

@@ -8,5 +8,10 @@ namespace Domain_Service.Entities.AnnouncementAndDownload
 {
     public class Announcement
     {
+        public Guid AnnouncementId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public Guid PostedBy { get; set; }
+        public DateTime DatePosted { get; set; }
     }
 }
