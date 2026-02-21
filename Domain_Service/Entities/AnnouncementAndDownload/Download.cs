@@ -8,7 +8,7 @@ namespace Domain_Service.Entities.AnnouncementAndDownload
 {
     public class Download
     {
-       public Guid FiledId { get; set; }
+       public Guid FileId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string FilePath { get; set; } = string.Empty;
         public Guid UploadedBy { get; set; }
