@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 
 namespace Domain_Service.Entities.FacultyModule
 {
+    
     public class Faculty
     {
         [Key]
         public Guid FacultyId { get; set; }
         public Guid UserId { get; set; }
         public String Department { get; set; } = string.Empty;
-        public ICollection<Subject> SubjectsTaught { get; set; }
-        public ICollection<Project> SupervisedProjects { get; set; }
+        public List<Subject> SubjectsTaught { get; set; } = new List<Subject>();
+        public List<Project> SupervisedProjects { get; set; } = new List<Project>();
     }
 }

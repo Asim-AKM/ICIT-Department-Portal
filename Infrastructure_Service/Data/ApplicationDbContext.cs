@@ -27,6 +27,7 @@ namespace Infrastructure_Service.Data
         public DbSet<Proposal> Proposals { get; set; }
         public DbSet<Download> Downloads { get; set; }
         public DbSet<Announcement> Announcements { get; set; } 
+        public DbSet<Project> Projects { get; set; }
 
     }
 }
