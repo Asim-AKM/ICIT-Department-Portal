@@ -14,4 +14,10 @@ namespace Domain_Service.Enum
         Suspended = 4
     }
 
+    public enum StudentStatus
+    {
+        Pending = 1,
+        Approved = 2,
+        Rejected = 3
+    }
 }

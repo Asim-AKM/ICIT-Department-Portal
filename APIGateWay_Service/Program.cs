@@ -1,5 +1,6 @@
 
 using APIGateway_Service.Extentions;
+using Infrastructure_Service.DI;
 
 namespace APIGateway_Service
 {
@@ -16,6 +17,8 @@ namespace APIGateway_Service
             builder.Services.AddOpenApi();
 
             builder.Services.AddSwaggerConfigration();
+
+            builder.Services.InfrastructureDIConfigur(builder.Configuration);
 
             var app = builder.Build();
 
