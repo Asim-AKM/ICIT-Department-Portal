@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace Domain_Service.Enum
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum RoleType
     {
         Admin = 1,
-        User = 2,
-        Manager = 3
+        Clerk = 2,
+        Faculty = 3,
+        Students = 4,
     }
 
 }

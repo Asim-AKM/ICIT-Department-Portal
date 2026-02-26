@@ -18,7 +18,6 @@
     <Folder Include="Entities\FYPPropsalModule\" />
     <Folder Include="Entities\StudentModule\" />
     <Folder Include="Entities\UserManagmentModule\" />
-    <Folder Include="RepoInterfaces\" />
   </ItemGroup>
 
   <ItemGroup>
