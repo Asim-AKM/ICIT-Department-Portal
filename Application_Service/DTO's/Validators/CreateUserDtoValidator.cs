@@ -32,8 +32,11 @@ namespace Application_Service.DTO_s.Validators
             // Email rules
             // -------------------------------
             RuleFor(x => x.Email)
-                .NotEmpty().WithMessage("Email is required.")
-                .EmailAddress().WithMessage("Invalid email format.");
+                 .NotEmpty().WithMessage("Email is required.")
+                 .EmailAddress().WithMessage("Invalid email format.")
+                 .Matches(@"^[^@\s]+(\.[^@\s]+)?@[^@\s]+\.[^@\s]+$")
+                 .WithMessage("Email can contain only one dot before the @.");
+
 
             // -------------------------------
             // Password rules
