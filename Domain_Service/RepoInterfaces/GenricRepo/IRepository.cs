@@ -1,0 +1,17 @@
+﻿using System.Linq.Expressions;
+
+namespace Domain_Service.RepoInterfaces.GenricRepo
+{
+    public interface IRepository<T>  where T : class
+    {
+        Task<T?> GetByIdAsync(Guid id);
+        Task<List<T>> GetAllAsync();
+        Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
+
+        Task<T> CreateAsync(T entity);
+        Task<T> Update(T entity);
+        Task<bool> Remove(Guid id);
+
+        Task SaveChangesAsync();
+    }
+}
