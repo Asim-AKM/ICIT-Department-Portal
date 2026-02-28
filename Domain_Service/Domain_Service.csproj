@@ -16,6 +16,7 @@
     <Folder Include="Entities\FacultyModule\" />
     <Folder Include="Entities\AnnouncementAndDownload\" />
     <Folder Include="Entities\FYPPropsalModule\" />
+    <Folder Include="Entities\StudentModule\" />
     <Folder Include="Entities\UserManagmentModule\" />
   </ItemGroup>
 

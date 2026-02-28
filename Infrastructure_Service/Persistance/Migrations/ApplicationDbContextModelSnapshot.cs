@@ -221,38 +221,6 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.ToTable("FeeRecords");
                 });
 
-            modelBuilder.Entity("Domain_Service.Entities.StudentModule.Semester", b =>
-                {
-                    b.Property<Guid>("SemesterId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("SessionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("StudentSessionSessionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("SemesterId");
-
-                    b.HasIndex("StudentSessionSessionId");
-
-                    b.ToTable("Semesters");
-                });
-
             modelBuilder.Entity("Domain_Service.Entities.StudentModule.Student", b =>
                 {
                     b.Property<Guid>("StudentId")
@@ -265,21 +233,15 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.Property<float>("GPA")
                         .HasColumnType("real");
 
-                    b.Property<string>("RegistrationNo")
+                    b.Property<string>("RegistrationNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RollNo")
+                    b.Property<string>("RollNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SamesterId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SemesterId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SessionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
@@ -289,30 +251,7 @@ namespace Infrastructure_Service.Persistance.Migrations
 
                     b.HasIndex("FYPTeamTeamId");
 
-                    b.HasIndex("SemesterId");
-
                     b.ToTable("Students");
-                });
-
-            modelBuilder.Entity("Domain_Service.Entities.StudentModule.StudentSession", b =>
-                {
-                    b.Property<Guid>("SessionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("EndYear")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartYear")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("SessionId");
-
-                    b.ToTable("StudentSessions");
                 });
 
             modelBuilder.Entity("Domain_Service.Entities.UserManagmentModule.User", b =>
@@ -431,22 +370,11 @@ namespace Infrastructure_Service.Persistance.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain_Service.Entities.StudentModule.Semester", b =>
-                {
-                    b.HasOne("Domain_Service.Entities.StudentModule.StudentSession", null)
-                        .WithMany("Semesters")
-                        .HasForeignKey("StudentSessionSessionId");
-                });
-
             modelBuilder.Entity("Domain_Service.Entities.StudentModule.Student", b =>
                 {
                     b.HasOne("Domain_Service.Entities.FYPPropsalModule.FYPTeam", null)
                         .WithMany("Members")
                         .HasForeignKey("FYPTeamTeamId");
-
-                    b.HasOne("Domain_Service.Entities.StudentModule.Semester", null)
-                        .WithMany("Students")
-                        .HasForeignKey("SemesterId");
                 });
 
             modelBuilder.Entity("Domain_Service.Entities.FYPPropsalModule.FYPTeam", b =>
@@ -466,19 +394,9 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.Navigation("SupervisedProjects");
                 });
 
-            modelBuilder.Entity("Domain_Service.Entities.StudentModule.Semester", b =>
-                {
-                    b.Navigation("Students");
-                });
-
             modelBuilder.Entity("Domain_Service.Entities.StudentModule.Student", b =>
                 {
                     b.Navigation("FeeRecords");
-                });
-
-            modelBuilder.Entity("Domain_Service.Entities.StudentModule.StudentSession", b =>
-                {
-                    b.Navigation("Semesters");
                 });
 #pragma warning restore 612, 618
         }

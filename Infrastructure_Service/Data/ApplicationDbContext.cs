@@ -21,8 +21,6 @@ namespace Infrastructure_Service.Data
         public DbSet<UserCredential> UserCredentials { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<FeeRecord> FeeRecords { get; set; }
-        public DbSet<Semester> Semesters { get; set; }
-        public DbSet<StudentSession> StudentSessions { get; set; }
         public DbSet<Faculty> Faculties  { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<FYPTeam> FYPTeams { get; set; }    
