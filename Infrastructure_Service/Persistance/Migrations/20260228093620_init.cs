@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure_Service.Persistance.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -69,6 +69,20 @@ namespace Infrastructure_Service.Persistance.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StudentSessions",
+                columns: table => new
+                {
+                    SessionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartYear = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndYear = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentSessions", x => x.SessionId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserCredentials",
                 columns: table => new
                 {
@@ -116,7 +130,7 @@ namespace Infrastructure_Service.Persistance.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Project",
+                name: "Projects",
                 columns: table => new
                 {
                     ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -125,9 +139,9 @@ namespace Infrastructure_Service.Persistance.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Project", x => x.ProjectId);
+                    table.PrimaryKey("PK_Projects", x => x.ProjectId);
                     table.ForeignKey(
-                        name: "FK_Project_Faculties_FacultyId",
+                        name: "FK_Projects_Faculties_FacultyId",
                         column: x => x.FacultyId,
                         principalTable: "Faculties",
                         principalColumn: "FacultyId",
@@ -155,25 +169,25 @@ namespace Infrastructure_Service.Persistance.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Students",
+                name: "Semesters",
                 columns: table => new
                 {
-                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RegistrationNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RollNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SamesterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    GPA = table.Column<float>(type: "real", nullable: false),
-                    FYPTeamTeamId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    SemesterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SessionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Students", x => x.StudentId);
+                    table.PrimaryKey("PK_Semesters", x => x.SemesterId);
                     table.ForeignKey(
-                        name: "FK_Students_FYPTeams_FYPTeamTeamId",
-                        column: x => x.FYPTeamTeamId,
-                        principalTable: "FYPTeams",
-                        principalColumn: "TeamId");
+                        name: "FK_Semesters_StudentSessions_SessionId",
+                        column: x => x.SessionId,
+                        principalTable: "StudentSessions",
+                        principalColumn: "SessionId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -193,10 +207,39 @@ namespace Infrastructure_Service.Persistance.Migrations
                 {
                     table.PrimaryKey("PK_Proposals", x => x.ProposalId);
                     table.ForeignKey(
-                        name: "FK_Proposals_Project_ProjectId",
+                        name: "FK_Proposals_Projects_ProjectId",
                         column: x => x.ProjectId,
-                        principalTable: "Project",
+                        principalTable: "Projects",
                         principalColumn: "ProjectId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Students",
+                columns: table => new
+                {
+                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RegistrationNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RollNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SamesterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SessionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    GPA = table.Column<float>(type: "real", nullable: false),
+                    FYPTeamTeamId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    SemesterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Students", x => x.StudentId);
+                    table.ForeignKey(
+                        name: "FK_Students_FYPTeams_FYPTeamTeamId",
+                        column: x => x.FYPTeamTeamId,
+                        principalTable: "FYPTeams",
+                        principalColumn: "TeamId");
+                    table.ForeignKey(
+                        name: "FK_Students_Semesters_SemesterId",
+                        column: x => x.SemesterId,
+                        principalTable: "Semesters",
+                        principalColumn: "SemesterId");
                 });
 
             migrationBuilder.CreateTable(
@@ -227,8 +270,8 @@ namespace Infrastructure_Service.Persistance.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Project_FacultyId",
-                table: "Project",
+                name: "IX_Projects_FacultyId",
+                table: "Projects",
                 column: "FacultyId");
 
             migrationBuilder.CreateIndex(
@@ -237,9 +280,19 @@ namespace Infrastructure_Service.Persistance.Migrations
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Semesters_SessionId",
+                table: "Semesters",
+                column: "SessionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Students_FYPTeamTeamId",
                 table: "Students",
                 column: "FYPTeamTeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Students_SemesterId",
+                table: "Students",
+                column: "SemesterId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subjects_FacultyId",
@@ -278,13 +331,19 @@ namespace Infrastructure_Service.Persistance.Migrations
                 name: "Students");
 
             migrationBuilder.DropTable(
-                name: "Project");
+                name: "Projects");
 
             migrationBuilder.DropTable(
                 name: "FYPTeams");
 
             migrationBuilder.DropTable(
+                name: "Semesters");
+
+            migrationBuilder.DropTable(
                 name: "Faculties");
+
+            migrationBuilder.DropTable(
+                name: "StudentSessions");
         }
     }
 }

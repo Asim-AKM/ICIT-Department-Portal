@@ -4,11 +4,6 @@ using Domain_Service.Entities.FYPPropsalModule;
 using Domain_Service.Entities.StudentModule;
 using Domain_Service.Entities.UserManagmentModule;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure_Service.Data
 {
@@ -22,7 +17,7 @@ namespace Infrastructure_Service.Data
         public DbSet<Student> Students { get; set; }
         public DbSet<FeeRecord> FeeRecords { get; set; }
         public DbSet<Semester> Semesters { get; set; }
-        public DbSet<StudentSession> StudentSessions { get; set; }
+        public DbSet<Session> Sessions { get; set; }
         public DbSet<Faculty> Faculties  { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<FYPTeam> FYPTeams { get; set; }    

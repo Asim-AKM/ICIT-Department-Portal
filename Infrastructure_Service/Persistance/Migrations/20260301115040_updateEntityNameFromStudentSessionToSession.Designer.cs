@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure_Service.Persistance.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260224000703_projectEntity")]
-    partial class projectEntity
+    [Migration("20260301115040_updateEntityNameFromStudentSessionToSession")]
+    partial class updateEntityNameFromStudentSessionToSession
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -224,6 +224,56 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.ToTable("FeeRecords");
                 });
 
+            modelBuilder.Entity("Domain_Service.Entities.StudentModule.Semester", b =>
+                {
+                    b.Property<Guid>("SemesterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("SemesterId");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("Semesters");
+                });
+
+            modelBuilder.Entity("Domain_Service.Entities.StudentModule.Session", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndYear")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartYear")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SessionId");
+
+                    b.ToTable("Sessions");
+                });
+
             modelBuilder.Entity("Domain_Service.Entities.StudentModule.Student", b =>
                 {
                     b.Property<Guid>("StudentId")
@@ -236,15 +286,21 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.Property<float>("GPA")
                         .HasColumnType("real");
 
-                    b.Property<string>("RegistrationNumber")
+                    b.Property<string>("RegistrationNo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RollNumber")
+                    b.Property<string>("RollNo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SamesterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SemesterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SessionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
@@ -253,6 +309,8 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.HasKey("StudentId");
 
                     b.HasIndex("FYPTeamTeamId");
+
+                    b.HasIndex("SemesterId");
 
                     b.ToTable("Students");
                 });
@@ -373,11 +431,24 @@ namespace Infrastructure_Service.Persistance.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain_Service.Entities.StudentModule.Semester", b =>
+                {
+                    b.HasOne("Domain_Service.Entities.StudentModule.Session", null)
+                        .WithMany("Semesters")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain_Service.Entities.StudentModule.Student", b =>
                 {
                     b.HasOne("Domain_Service.Entities.FYPPropsalModule.FYPTeam", null)
                         .WithMany("Members")
                         .HasForeignKey("FYPTeamTeamId");
+
+                    b.HasOne("Domain_Service.Entities.StudentModule.Semester", null)
+                        .WithMany("Students")
+                        .HasForeignKey("SemesterId");
                 });
 
             modelBuilder.Entity("Domain_Service.Entities.FYPPropsalModule.FYPTeam", b =>
@@ -395,6 +466,16 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.Navigation("SubjectsTaught");
 
                     b.Navigation("SupervisedProjects");
+                });
+
+            modelBuilder.Entity("Domain_Service.Entities.StudentModule.Semester", b =>
+                {
+                    b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("Domain_Service.Entities.StudentModule.Session", b =>
+                {
+                    b.Navigation("Semesters");
                 });
 
             modelBuilder.Entity("Domain_Service.Entities.StudentModule.Student", b =>

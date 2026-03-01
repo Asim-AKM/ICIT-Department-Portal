@@ -1,4 +1,6 @@
 ﻿using Application_Service.Common.Filters;
+using Application_Service.Services.AdminServices.Implementations;
+using Application_Service.Services.AdminServices.Interfaces;
 using Application_Service.Services.StudentServices.Implementation;
 using Application_Service.Services.StudentServices.Interfaces;
 using Application_Service.Services.UserManagmentServices.Implementation;
@@ -15,7 +17,8 @@ namespace Application_Service.DI
             .AddScoped<IAuthenticationServce, AuthenticationServce>()
             .AddScoped<IPasswordEncriptor, PasswordEncriptor>()
             .AddScoped<IAccounService, AccountService>()
-            .AddScoped<IStudentService, StudentService>();
+            .AddScoped<IStudentService, StudentService>()
+            .AddScoped<ISessionService, SessionService>();
 
     }
 }
