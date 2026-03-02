@@ -12,13 +12,12 @@ namespace Application_Service.Services.UserManagmentServices.Implementation
         private readonly IUnitOfWork _uow;
         public AccountService(IUnitOfWork unitOfWork)
         {
-          
-             this._uow = unitOfWork;
+            this._uow = unitOfWork;
         }
-        public async Task<ApiResponse<CreateUserDto>> CreateAccount(CreateUserDto request,RoleType role)
+        public async Task<ApiResponse<CreateUserDto>> CreateAccount(CreateUserDto request, RoleType role)
         {
-            var emailExistance = await _uow.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-            var userNameExistance = await _uow.Users.FirstOrDefaultAsync(u => u.UserName == request.UserName);
+            var emailExistance = await _uow.UserRepo.FirstOrDefaultAsync(u => u.Email == request.Email);
+            var userNameExistance = await _uow.UserRepo.FirstOrDefaultAsync(u => u.UserName == request.UserName);
 
             // Acomulate Errors in a list 
             if (emailExistance != null || userNameExistance != null)
@@ -32,23 +31,25 @@ namespace Application_Service.Services.UserManagmentServices.Implementation
                 var error = string.Join(" | ", errorsList);
                 return ApiResponse<CreateUserDto>.Fail(error, ResponseType.Conflict);
             }
-
-            // Create User
-            var user = request.MapToDomain();
-            await _uow.Users.CreateAsync(user);
-            var cread = user.MapToCreadDomain(request.Password);
-            await _uow.UserCreads.CreateAsync(cread);
-            await _uow.UserRoles.CreateAsync(user.MapToUserRoleDomain(role));
-
-            //Save to database
-            var saved = await _uow.SaveChangesAsync() > 0;
-
-            if (!saved)
+            try
             {
-                return ApiResponse<CreateUserDto>.Fail("Failed to Create User", ResponseType.BadRequest);
-            }
+                // Create User
+                await _uow.ExecuteInTransactionAsync(async () =>
+                {
+                    var user = request.MapToDomain();
+                    await _uow.UserRepo.CreateAsync(user);
+                    var cread = user.MapToCreadDomain(request.Password);
+                    await _uow.UserCreadentialRepo.CreateAsync(cread);
+                    await _uow.UserRoleRepo.CreateAsync(user.MapToUserRoleDomain(role));
+                });
 
-            return ApiResponse<CreateUserDto>.Success(request,"User created successfully",ResponseType.Created);
+                return ApiResponse<CreateUserDto>.Success(request, "User created successfully", ResponseType.Created);
+            }
+            catch (Exception ex)
+            {
+
+                return ApiResponse<CreateUserDto>.Fail($"Failed to Create User{ex.Message}", ResponseType.BadRequest);
+            }
         }
     }
 }

@@ -1,6 +1,9 @@
-﻿namespace Domain_Service.RepoInterfaces.UserManagment
+﻿using Domain_Service.Entities.UserManagmentModule;
+using Domain_Service.RepoInterfaces.GenricRepo;
+
+namespace Domain_Service.RepoInterfaces.UserManagment
 {
-    public interface IUserRoleRepo
+    public interface IUserRoleRepo : IRepository<UserRole>
     {
     }
 }

@@ -43,15 +43,11 @@ namespace Infrastructure_Service.Persistance.GenericRepository
             return true;
         }
 
-        public async Task SaveChangesAsync()
-        {
-          await _context.SaveChangesAsync();
-        }
-
         public async Task<T> Update(T entity)
         {
             _dbSet.Update(entity);
             return entity;
         }
+
     }
 }

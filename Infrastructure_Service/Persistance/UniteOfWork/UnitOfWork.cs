@@ -17,65 +17,65 @@ namespace Infrastructure_Service.Persistance.UniteOfWork
     {
         private readonly ApplicationDbContext _dbContext;
 
-        public UnitOfWork(ApplicationDbContext context)
+        // Repositories injected
+        public IUserRepo UserRepo { get; }
+        public IUserRoleRepo UserRoleRepo { get; }
+        public IUserCreadentialRepo UserCreadentialRepo { get; }
+        public IStudentRepo StudentRepo { get; }
+        public ISessionRepo SessionRepo { get; }
+
+        // Constructor: all dependencies injected
+        public UnitOfWork( 
+            ApplicationDbContext dbContext, IUserRepo userRepo,
+            IUserRoleRepo userRoleRepo,
+            IUserCreadentialRepo userCreadentialRepo,
+            IStudentRepo studentRepo,
+            ISessionRepo sessionRepo
+         )
         {
-            _dbContext = context;
+            _dbContext = dbContext;
+            UserRepo = userRepo;
+            UserRoleRepo = userRoleRepo;
+            UserCreadentialRepo = userCreadentialRepo;
+            StudentRepo = studentRepo;
+            SessionRepo = sessionRepo;
         }
 
-        // ==========================
-        // Lazy initialization for Repositories
-        // Property tabhi create hogi jab first time access hoga
-        // ==========================
-
-        private IRepository<User>? _users;
-        public IRepository<User> Users
-        {
-            get
-            {
-                if (_users == null)
-                {
-                    _users = new Repository<User>(_dbContext); // Agar null hai, create repository
-                }
-                return _users; // Otherwise existing return karo
-            }
-        }
-
-        private IRepository<UserCredential>? _userCreads;
-        public IRepository<UserCredential> UserCreads => _userCreads ??= new Repository<UserCredential>(_dbContext); // Generic UserCredential repo
-
-        private IRepository<UserRole>? _userRoles;
-        public IRepository<UserRole> UserRoles => _userRoles ??= new Repository<UserRole>(_dbContext); // Generic UserRole repo
-
-        private IRepository<Student>? _students;
-        public IRepository<Student> Students => _students ??= new Repository<Student>(_dbContext); // Generic Student repo
-
-        private IRepository<Session> _sessions;
-        public IRepository<Session> Sessions => _sessions ??= new Repository<Session>(_dbContext); // Generic Session repo
-
-        private IUserRepo? _userRepo;
-        public IUserRepo UserRepo => _userRepo ??= new UserRepo(_dbContext); // Custom repo for User
-
-        private IUserRoleRepo? _userRoleRepo;
-        public IUserRoleRepo UserRoleRepo => _userRoleRepo ??= new UserRoleRepo(_dbContext); // Custom repo for UserRole
-
-        private IUserCreadentialRepo? _userCreadentialRepo;
-        public IUserCreadentialRepo UserCreadentialRepo => _userCreadentialRepo ??= new UserCreadentialRepo(_dbContext); // Custom repo for UserCredential
-
-        private IStudentRepo _studentRepo;
-        public IStudentRepo StudentRepo => _studentRepo ??= new StudentRepo(_dbContext); // Custom repo for Student
-
-        private ISessionRepo _sessionRepo;
-        public ISessionRepo SessionRepo => _sessionRepo ??= new SessionRepo(_dbContext); // Custom repo for Session
-
-
-
-        // ==========================
-        // SaveChanges method
-        // Changes ko database me commit karta hai
-        // ==========================
+        /// <summary>
+        /// Save changes to DB
+        /// </summary>
         public async Task<int> SaveChangesAsync()
         {
             return await _dbContext.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Execute multiple repository operations in a transaction
+        /// </summary>
+        public async Task ExecuteInTransactionAsync(Func<Task> operations)
+        {
+            if (operations == null) throw new ArgumentNullException(nameof(operations));
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                await operations();
+                await SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Properly dispose DbContext
+        /// </summary>
+        public void Dispose()
+        {
+            _dbContext?.Dispose();
         }
     }
 }

@@ -1,6 +1,9 @@
-﻿namespace Domain_Service.RepoInterfaces.StudentManagments
+﻿using Domain_Service.Entities.StudentModule;
+using Domain_Service.RepoInterfaces.GenricRepo;
+
+namespace Domain_Service.RepoInterfaces.StudentManagments
 {
-    public interface IStudentRepo
+    public interface IStudentRepo : IRepository<Student>
     {
     }
 }
