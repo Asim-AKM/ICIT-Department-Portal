@@ -17,7 +17,7 @@ namespace Application_Service.Services.AdminServices.Implementations
         public async Task<ApiResponse<SessionAddDto>> CreateSessionAsync(SessionAddDto request)
         {
             var domain = request.MapToSession();
-            await _unitOfWork.Sessions.CreateAsync(domain);
+            await _unitOfWork.SessionRepo.CreateAsync(domain);
             await _unitOfWork.SaveChangesAsync();
             return ApiResponse<SessionAddDto>.Success(request, "Session Created Successfully", ResponseType.Created);
         }

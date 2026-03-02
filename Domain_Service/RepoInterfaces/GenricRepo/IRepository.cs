@@ -11,7 +11,5 @@ namespace Domain_Service.RepoInterfaces.GenricRepo
         Task<T> CreateAsync(T entity);
         Task<T> Update(T entity);
         Task<bool> Remove(Guid id);
-
-        Task SaveChangesAsync();
     }
 }
