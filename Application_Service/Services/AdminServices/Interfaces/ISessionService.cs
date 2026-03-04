@@ -6,7 +6,7 @@ namespace Application_Service.Services.AdminServices.Interfaces
 {
     public interface ISessionService
     {
-            Task<List<SessionGetDTO>> GetAllSessionsAsync();
+            Task<ApiResponse<List<SessionGetDTO>>> GetAllSessionsAsync();
             Task<SessionGetDTO> GetSessionByIdAsync(Guid sessionId);
             Task<ApiResponse<SessionAddDto>> CreateSessionAsync(SessionAddDto session);
             Task<SessionUpdateDto> UpdateSessionAsync(SessionUpdateDto updateDto);

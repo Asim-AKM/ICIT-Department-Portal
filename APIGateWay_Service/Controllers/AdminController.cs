@@ -47,5 +47,16 @@ namespace APIGateway_Service.Controllers
             var response = await _sessionService.CreateSessionAsync(request);
             return StatusCode((int)response.Status, response);
         }
+
+        [HttpGet("Sessions")]
+        [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetSessions()
+        {
+            var response = await _sessionService.GetAllSessionsAsync();
+            return StatusCode((int)response.Status, response);
+        }
     }
 }

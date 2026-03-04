@@ -2,6 +2,7 @@
 using Application_Service.DTO_s.StudentDTO_s;
 using Application_Service.Mapper_s.StudentManagmenMappers;
 using Application_Service.Services.AdminServices.Interfaces;
+using Domain_Service.Entities.StudentModule;
 using Domain_Service.Enum;
 using Domain_Service.RepoInterfaces.UnitOfWork;
 
@@ -16,10 +17,61 @@ namespace Application_Service.Services.AdminServices.Implementations
         }
         public async Task<ApiResponse<SessionAddDto>> CreateSessionAsync(SessionAddDto request)
         {
-            var domain = request.MapToSession();
-            await _unitOfWork.SessionRepo.CreateAsync(domain);
-            await _unitOfWork.SaveChangesAsync();
-            return ApiResponse<SessionAddDto>.Success(request, "Session Created Successfully", ResponseType.Created);
+            try
+            {
+                DateTime calculatedEndDate = request.StartDate.AddYears(4).AddDays(-1);
+
+                var overlapping = await _unitOfWork.SessionRepo.FirstOrDefaultAsync(s =>request.StartDate <= s.EndDate && calculatedEndDate >= s.StartDate);
+
+                if (overlapping != null)
+                {
+                    return ApiResponse<SessionAddDto>.Fail(
+                        request,
+                        "Session dates overlap with an existing session.",
+                        ResponseType.Conflict);
+                }
+
+                await _unitOfWork.ExecuteInTransactionAsync(async () =>
+                {
+                    var session = request.MapToSession();
+                    session.EndDate = calculatedEndDate;
+
+                    await _unitOfWork.SessionRepo.CreateAsync(session);
+
+                    DateTime semesterStart = session.StartDate;
+
+                    for (int i = 1; i <= 8; i++)
+                    {
+                        DateTime semesterEnd = semesterStart.AddMonths(6).AddDays(-1);
+                        int academicYear = ((i - 1) / 2) + 1;
+
+                        await _unitOfWork.SemesterRepo.CreateAsync(new Semester
+                        {
+                            SemesterId = Guid.NewGuid(),
+                            SessionId = session.SessionId,
+                            Name = $"Semester {i}",
+                            Order = i,
+                            AcademicYear = academicYear,
+                            StartDate = semesterStart,
+                            EndDate = semesterEnd
+                        });
+
+                        semesterStart = semesterStart.AddMonths(6);
+                    }
+                });
+
+                return ApiResponse<SessionAddDto>.Success(
+                    request,
+                    "Session created successfully",
+                    ResponseType.Created);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<SessionAddDto>.Fail(
+                    request,
+                    $"Failed to create session: {ex.Message}",
+                    ResponseType.BadRequest);
+            }
         }
 
         public Task<bool> DeleteSessionAsync(Guid sessionId)
@@ -27,9 +79,10 @@ namespace Application_Service.Services.AdminServices.Implementations
             throw new NotImplementedException();
         }
 
-        public Task<List<SessionGetDTO>> GetAllSessionsAsync()
+        public async Task<ApiResponse<List<SessionGetDTO>>> GetAllSessionsAsync()
         {
-            throw new NotImplementedException();
+            var sessions = await _unitOfWork.SessionRepo.GetAllAsync();
+            return ApiResponse<List<SessionGetDTO>>.Success(sessions.SessionsMapToSessionGetDto(),"List fetched",ResponseType.Ok);
         }
 
         public Task<SessionGetDTO> GetSessionByIdAsync(Guid sessionId)
