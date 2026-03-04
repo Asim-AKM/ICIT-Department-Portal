@@ -26,8 +26,7 @@ namespace Infrastructure_Service.DI
             .AddScoped<IUserRoleRepo, UserRoleRepo>()
             .AddScoped<IUserCreadentialRepo, UserCreadentialRepo>()
             .AddScoped<IStudentRepo, StudentRepo>()
-            .AddScoped<ISessionRepo, SessionRepo>()
-            .AddScoped<ISemesterRepo, SemeterRepo>();
+            .AddScoped<ISessionRepo, SessionRepo>();
 
 
     }

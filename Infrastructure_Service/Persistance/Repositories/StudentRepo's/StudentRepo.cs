@@ -2,7 +2,6 @@
 using Domain_Service.RepoInterfaces.StudentManagments;
 using Infrastructure_Service.Data;
 using Infrastructure_Service.Persistance.GenericRepository;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure_Service.Persistance.Repositories.StudentRepo_s
 {
@@ -12,15 +11,6 @@ namespace Infrastructure_Service.Persistance.Repositories.StudentRepo_s
         public StudentRepo(ApplicationDbContext context) : base(context)
         {
             _context = context;
-        }
-
-
-        public async Task<List<string>> StudentRollNoList(Guid sessionId)
-        {
-            return await _context.Students
-                .Where(s => s.SessionId == sessionId)
-                .Select(x => x.RollNo)
-                .ToListAsync();
         }
     }
 }

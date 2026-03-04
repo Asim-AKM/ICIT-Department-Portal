@@ -1,5 +1,10 @@
 ﻿using Application_Service.DTO_s.StudentDTO_s;
 using Domain_Service.Entities.StudentModule;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Application_Service.Mapper_s.StudentManagmenMappers
 {
@@ -11,8 +16,8 @@ namespace Application_Service.Mapper_s.StudentManagmenMappers
             {
               SessionId = new Guid(),
                 Name = dto.Name,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate
+                StartYear = dto.StartYear,
+                EndYear = dto.EndYear
             };
         }
     }

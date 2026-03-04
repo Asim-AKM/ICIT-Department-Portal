@@ -11,12 +11,6 @@ namespace Infrastructure_Service.Persistance.GenericRepository
         private readonly ApplicationDbContext _context = dbContext;
         private readonly DbSet<T> _dbSet = dbContext.Set<T>();
 
-        public async Task<string> AddRangeAsync(List<T> entities)
-        {
-          await _dbSet.AddRangeAsync(entities);
-            return "Data Has Been Added";
-        }
-
         public async Task<T> CreateAsync(T entity)
         {
             await _dbSet.AddAsync(entity);

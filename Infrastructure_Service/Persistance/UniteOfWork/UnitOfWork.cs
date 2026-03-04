@@ -23,7 +23,6 @@ namespace Infrastructure_Service.Persistance.UniteOfWork
         public IUserCreadentialRepo UserCreadentialRepo { get; }
         public IStudentRepo StudentRepo { get; }
         public ISessionRepo SessionRepo { get; }
-        public ISemesterRepo SemesterRepo { get; }
 
         // Constructor: all dependencies injected
         public UnitOfWork( 
@@ -31,8 +30,7 @@ namespace Infrastructure_Service.Persistance.UniteOfWork
             IUserRoleRepo userRoleRepo,
             IUserCreadentialRepo userCreadentialRepo,
             IStudentRepo studentRepo,
-            ISessionRepo sessionRepo,
-            ISemesterRepo semesterRepo
+            ISessionRepo sessionRepo
          )
         {
             _dbContext = dbContext;
@@ -41,8 +39,6 @@ namespace Infrastructure_Service.Persistance.UniteOfWork
             UserCreadentialRepo = userCreadentialRepo;
             StudentRepo = studentRepo;
             SessionRepo = sessionRepo;
-            SemesterRepo = semesterRepo;
-
         }
 
         /// <summary>

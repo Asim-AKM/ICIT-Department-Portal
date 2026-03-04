@@ -7,13 +7,11 @@ namespace Domain_Service.Entities.StudentModule
         [Key]
         public Guid StudentId { get; set; }
         public Guid UserId { get; set; }
-        public string StudentName { get; set; }= string.Empty;
-        public string StudentEmail { get; set; } = string.Empty;
-        public string RollNo { get; set; } = string.Empty;
         public string RegistrationNo { get; set; } = string.Empty;
-        public float GPA { get; set; } = float.MinValue;
+        public string RollNo { get; set; } = string.Empty;
         public Guid SamesterId { get; set; }
         public Guid SessionId { get; set; }
+        public float GPA { get; set; }
         public List<FeeRecord> FeeRecords { get; set; } = new List<FeeRecord>();
     }
 }
