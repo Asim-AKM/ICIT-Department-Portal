@@ -8,8 +8,9 @@ namespace Domain_Service.Entities.StudentModule
         [Key]
         public Guid SessionId { get; set; }
         public string Name { get; set; } = string.Empty; // e.g. "Session 2026-2029"
-        public DateTime StartYear { get; set; }
-        public DateTime EndYear { get; set; }
-        public List<Semester> Semesters { get; set; } = new List<Semester>();
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+
+        public List<Semester> Semesters { get; set; } = new();
     }
 }
