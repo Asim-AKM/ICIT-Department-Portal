@@ -11,9 +11,11 @@ namespace Domain_Service.Entities.StudentModule
         public string StudentEmail { get; set; } = string.Empty;
         public string RollNo { get; set; } = string.Empty;
         public string RegistrationNo { get; set; } = string.Empty;
+        public string CNIC {  get; set; } = string.Empty;
         public float GPA { get; set; } = float.MinValue;
         public Guid SamesterId { get; set; }
         public Guid SessionId { get; set; }
+        public string Status { get; set; } = string.Empty;
         public List<FeeRecord> FeeRecords { get; set; } = new List<FeeRecord>();
     }
 }

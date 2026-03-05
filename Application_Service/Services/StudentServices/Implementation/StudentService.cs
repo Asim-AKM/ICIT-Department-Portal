@@ -1,4 +1,6 @@
 ﻿using Application_Service.Common;
+using Application_Service.DTO_s.StudentDTO_s;
+using Application_Service.Mapper_s.StudentManagmenMappers;
 using Application_Service.Services.AdminServices.Interfaces;
 using Application_Service.Services.StudentServices.Interfaces;
 using ClosedXML.Excel;
@@ -18,6 +20,47 @@ namespace Application_Service.Services.StudentServices.Implementation
             _uow = unitOfWork;
             _sessionService = sessionService;
         }
+        public async Task<ApiResponse<List<GetStudentDto>>> GetStudentListBySessionIdAsync(Guid sessionId)
+        {
+            try
+            {
+                //  Input validation
+                if (sessionId == Guid.Empty)
+                    return ApiResponse<List<GetStudentDto>>.Fail("Invalid session identifier",ResponseType.BadRequest);
+
+                //  Fetch data 
+                var students = await _uow.StudentRepo.GetStudentListBySessionIdAsync(sessionId);
+
+                //  Handle empty results gracefully
+                if (students == null || !students.Any())
+                {
+                    return ApiResponse<List<GetStudentDto>>.Success(
+                        new List<GetStudentDto>(),
+                        "No students found for the specified session",
+                        ResponseType.Ok);
+                }
+
+                //  Map to DTO
+                var studentDtos = students.MapStudentListToGetStudentDto();
+
+               
+
+                //  Return standardized response
+                return ApiResponse<List<GetStudentDto>>.Success(
+                    studentDtos,
+                    "Students retrieved successfully",
+                    ResponseType.Ok);
+            }
+            catch (Exception ex)
+            {
+               
+
+                return ApiResponse<List<GetStudentDto>>.Fail(
+                    "An error occurred while retrieving students",
+                    ResponseType.InternalServerError);
+            }
+        }
+
         /// <summary>
         /// Uploads student records from an Excel file to the database for the specified academic session.
         /// </summary>
@@ -73,11 +116,12 @@ namespace Application_Service.Services.StudentServices.Implementation
                         var email = worksheet.Cell(row, 2).GetString().Trim();
                         var rollNo = worksheet.Cell(row, 3).GetString().Trim();
                         var regNo = worksheet.Cell(row, 4).GetString().Trim();
-
+                        var cnic = worksheet.Cell(row, 5).GetString().Trim();
                         if (string.IsNullOrWhiteSpace(name) ||
                             string.IsNullOrWhiteSpace(email) ||
                             string.IsNullOrWhiteSpace(rollNo) ||
-                            string.IsNullOrWhiteSpace(regNo))
+                            string.IsNullOrWhiteSpace(regNo) ||
+                            string.IsNullOrWhiteSpace(cnic))
                         {
                             throw new Exception($"Invalid data at row {row}");
                         }
@@ -95,6 +139,8 @@ namespace Application_Service.Services.StudentServices.Implementation
                             StudentEmail = email,
                             RollNo = rollNo,
                             RegistrationNo = regNo,
+                            CNIC = cnic,
+                            Status = "Unvarified",
                             GPA = 0,
                             SamesterId = firstSemester.SemesterId,
                             SessionId = sessionId
