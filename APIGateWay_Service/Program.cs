@@ -14,6 +14,17 @@ namespace APIGateway_Service
 
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowICITDeparmentUI", policy =>
+                {
+                    policy
+                        .WithOrigins("https://localhost:5173")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -33,6 +44,7 @@ namespace APIGateway_Service
 
             // Configure the HTTP request pipeline.
             app.AddMiddlewareConfigration();
+            app.UseCors("AllowICITDeparmentUI");
             app.Run();
         }
     }
