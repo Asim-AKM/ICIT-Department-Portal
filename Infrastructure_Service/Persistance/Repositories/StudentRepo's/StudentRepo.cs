@@ -18,13 +18,5 @@ namespace Infrastructure_Service.Persistance.Repositories.StudentRepo_s
         {
            return await _context.Students.Where(x=> x.SessionId == SessionId).ToListAsync();
         }
-
-        public async Task<List<string>> StudentRollNoList(Guid sessionId)
-        {
-            return await _context.Students
-                .Where(s => s.SessionId == sessionId)
-                .Select(x => x.RollNo)
-                .ToListAsync();
-        }
     }
 }

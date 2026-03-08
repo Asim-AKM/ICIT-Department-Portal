@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain_Service.Enum
+﻿namespace Domain_Service.Enum
 {
     public enum UserStatus
     {
@@ -16,11 +10,10 @@ namespace Domain_Service.Enum
 
     public enum StudentStatus
     {
-        Pending = 1,
-        Approved = 2,
+       
+        Unvarified = 1,
+        Varified = 2,
         Rejected = 3,
-        Unvarified = 4,
-        Varified = 5
      
     }
 

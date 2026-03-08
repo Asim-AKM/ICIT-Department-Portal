@@ -63,8 +63,6 @@ namespace APIGateway_Service.Controllers
 
         [HttpGet("Sessions")]
         [ProducesResponseType(typeof(SessionGetDTO), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(SessionGetDTO), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(SessionGetDTO), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(SessionGetDTO), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetSessions()
         {

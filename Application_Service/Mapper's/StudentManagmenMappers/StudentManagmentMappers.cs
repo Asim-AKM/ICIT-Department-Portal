@@ -30,7 +30,7 @@ namespace Application_Service.Mapper_s.StudentManagmenMappers
                         (
                         student.StudentId, student.UserId, student.RegistrationNo, student.RollNo,
                         student.SamesterId, student.SessionId, student.StudentName, student.StudentEmail,
-                        student.CNIC, student.Status
+                        student.CNIC, student.Status.ToString()
                         );
                     studentDtoList.Add(dto);
                 }

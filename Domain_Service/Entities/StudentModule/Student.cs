@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain_Service.Enum;
+using System.ComponentModel.DataAnnotations;
 
 namespace Domain_Service.Entities.StudentModule
 {
@@ -15,7 +16,7 @@ namespace Domain_Service.Entities.StudentModule
         public float GPA { get; set; } = float.MinValue;
         public Guid SamesterId { get; set; }
         public Guid SessionId { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public StudentStatus Status { get; set; }
         public List<FeeRecord> FeeRecords { get; set; } = new List<FeeRecord>();
     }
 }

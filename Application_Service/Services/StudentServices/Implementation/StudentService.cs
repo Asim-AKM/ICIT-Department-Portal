@@ -26,7 +26,7 @@ namespace Application_Service.Services.StudentServices.Implementation
             {
                 //  Input validation
                 if (sessionId == Guid.Empty)
-                    return ApiResponse<List<GetStudentDto>>.Fail("Invalid session identifier",ResponseType.BadRequest);
+                    return ApiResponse<List<GetStudentDto>>.Fail("Invalid session identifier", ResponseType.BadRequest);
 
                 //  Fetch data 
                 var students = await _uow.StudentRepo.GetStudentListBySessionIdAsync(sessionId);
@@ -43,7 +43,7 @@ namespace Application_Service.Services.StudentServices.Implementation
                 //  Map to DTO
                 var studentDtos = students.MapStudentListToGetStudentDto();
 
-               
+
 
                 //  Return standardized response
                 return ApiResponse<List<GetStudentDto>>.Success(
@@ -53,7 +53,7 @@ namespace Application_Service.Services.StudentServices.Implementation
             }
             catch (Exception ex)
             {
-               
+
 
                 return ApiResponse<List<GetStudentDto>>.Fail(
                     "An error occurred while retrieving students",
@@ -92,8 +92,13 @@ namespace Application_Service.Services.StudentServices.Implementation
                 if (firstSemester == null)
                     throw new Exception("Semester 1 not found.");
 
-                // Load existing RollNos once
-                var existingRollNosSet = (await _uow.StudentRepo.StudentRollNoList(sessionId)).ToHashSet();
+                // Fetch all existing students for the session in a single query
+                var existingStudents = await _uow.StudentRepo
+                    .GetStudentListBySessionIdAsync(sessionId); // returns List<Student>
+
+                var existingRollNos = existingStudents.Select(s => s.RollNo).ToHashSet();
+                var existingCnics = existingStudents.Select(s => s.CNIC).ToHashSet();
+                var existingEmails = existingStudents.Select(s => s.StudentEmail).ToHashSet();
 
                 // Transection Start
                 await _uow.ExecuteInTransactionAsync(async () =>
@@ -126,10 +131,19 @@ namespace Application_Service.Services.StudentServices.Implementation
                             throw new Exception($"Invalid data at row {row}");
                         }
 
-                        // Duplicate check in-memory
-                        if (existingRollNosSet.Contains(rollNo))
+                        // Check duplicates and return immediately
+                        if (existingRollNos.Contains(rollNo))
                             throw new Exception($"Duplicate RollNo at row {row}");
-                        existingRollNosSet.Add(rollNo);
+                        if (existingCnics.Contains(cnic))
+                            throw new Exception($"Duplicate CNIC at row {row}");
+
+                        if (existingEmails.Contains(email))
+                            throw new Exception($"Duplicate Email at row {row}");
+
+                        existingRollNos.Add(rollNo);
+                        existingCnics.Add(cnic);
+                        existingEmails.Add(email);
+
 
                         var student = new Student
                         {
@@ -140,7 +154,7 @@ namespace Application_Service.Services.StudentServices.Implementation
                             RollNo = rollNo,
                             RegistrationNo = regNo,
                             CNIC = cnic,
-                            Status = "Unvarified",
+                            Status = StudentStatus.Unvarified,
                             GPA = 0,
                             SamesterId = firstSemester.SemesterId,
                             SessionId = sessionId
@@ -149,7 +163,7 @@ namespace Application_Service.Services.StudentServices.Implementation
                         studentsToInsert.Add(student);
                     }
                     //  Insert all students
-                  await  _uow.StudentRepo.AddRangeAsync(studentsToInsert);
+                    await _uow.StudentRepo.AddRangeAsync(studentsToInsert);
                 });
 
                 return ApiResponse<string>.Success("Students uploaded successfully", "Upload successful", ResponseType.Created);
@@ -159,6 +173,5 @@ namespace Application_Service.Services.StudentServices.Implementation
                 return ApiResponse<string>.Fail($"Bulk Student Data Not Uploaded: {ex.Message}", ResponseType.BadRequest);
             }
         }
-
     }
 }

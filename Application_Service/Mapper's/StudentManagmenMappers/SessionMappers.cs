@@ -11,8 +11,7 @@ namespace Application_Service.Mapper_s.StudentManagmenMappers
               session.SessionId,
               session.Name,
               session.StartDate,
-              session.EndDate,
-              session.Status
+              session.EndDate
           )).ToList();
         }
     }
