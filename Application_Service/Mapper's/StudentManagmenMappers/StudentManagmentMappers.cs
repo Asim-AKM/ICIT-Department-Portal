@@ -1,5 +1,6 @@
 ﻿using Application_Service.DTO_s.StudentDTO_s;
 using Domain_Service.Entities.StudentModule;
+using Domain_Service.Enum;
 
 namespace Application_Service.Mapper_s.StudentManagmenMappers
 {
@@ -12,7 +13,8 @@ namespace Application_Service.Mapper_s.StudentManagmenMappers
               SessionId = new Guid(),
                 Name = dto.Name,
                 StartDate = dto.StartDate,
-                EndDate = dto.EndDate
+                EndDate = dto.EndDate,
+                Status = SessionStatus.Active
             };
         }
 

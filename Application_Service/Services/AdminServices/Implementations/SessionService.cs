@@ -21,7 +21,7 @@ namespace Application_Service.Services.AdminServices.Implementations
             {
                 DateTime calculatedEndDate = request.StartDate.AddYears(4).AddDays(-1);
 
-                var overlapping = await _unitOfWork.SessionRepo.FirstOrDefaultAsync(s =>request.StartDate <= s.EndDate && calculatedEndDate >= s.StartDate);
+                var overlapping = await _unitOfWork.SessionRepo.FirstOrDefaultAsync(s => request.StartDate <= s.EndDate && calculatedEndDate >= s.StartDate);
 
                 if (overlapping != null)
                 {
@@ -79,10 +79,25 @@ namespace Application_Service.Services.AdminServices.Implementations
             throw new NotImplementedException();
         }
 
-        public async Task<ApiResponse<List<SessionGetDTO>>> GetAllSessionsAsync()
+        public async Task<ApiResponse<List<SessionGetDTO>>> GetActiveSessionsAsync()
         {
-            var sessions = await _unitOfWork.SessionRepo.GetAllAsync();
-            return ApiResponse<List<SessionGetDTO>>.Success(sessions.SessionsMapToSessionGetDto(),"List fetched",ResponseType.Ok);
+            var sessions = await _unitOfWork.SessionRepo.GetActiveSessionsAsync();
+
+            if (!sessions.Any())
+            {
+                return ApiResponse<List<SessionGetDTO>>.Fail(
+                    "No active sessions found",
+                    ResponseType.NotFound
+                );
+            }
+
+            var result = sessions.SessionsMapToSessionGetDto();
+
+            return ApiResponse<List<SessionGetDTO>>.Success(
+                result,
+                "Sessions fetched successfully",
+                ResponseType.Ok
+            );
         }
 
         public Task<SessionGetDTO> GetSessionByIdAsync(Guid sessionId)

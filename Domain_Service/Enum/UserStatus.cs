@@ -18,6 +18,16 @@ namespace Domain_Service.Enum
     {
         Pending = 1,
         Approved = 2,
-        Rejected = 3
+        Rejected = 3,
+        Unvarified = 4,
+        Varified = 5
+     
+    }
+
+    public enum SessionStatus
+    {
+        Active =1, // When session Currently Running
+        Inactive = 2, //Incase We Inactive current Session 
+        Completed = 3, // when Session Completed
     }
 }

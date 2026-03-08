@@ -52,6 +52,14 @@ namespace APIGateway_Service.Controllers
             var response = await _sessionService.CreateSessionAsync(request);
             return StatusCode((int)response.Status, response);
         }
+        /// <summary>
+        /// Retrieves all active sessions asynchronously.
+        /// </summary>
+        /// <remarks>This method interacts with the session service to obtain a list of sessions. The
+        /// response status reflects the outcome of the operation, including possible error conditions such as bad
+        /// requests, conflicts, or internal server errors.</remarks>
+        /// <returns>An IActionResult containing the HTTP status code and the session data. Returns a 200 OK status with the
+        /// session information if successful; otherwise, returns an appropriate error status.</returns>
 
         [HttpGet("Sessions")]
         [ProducesResponseType(typeof(SessionGetDTO), StatusCodes.Status200OK)]
@@ -60,7 +68,7 @@ namespace APIGateway_Service.Controllers
         [ProducesResponseType(typeof(SessionGetDTO), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetSessions()
         {
-            var response = await _sessionService.GetAllSessionsAsync();
+            var response = await _sessionService.GetActiveSessionsAsync();
             return StatusCode((int)response.Status, response);
         }
 

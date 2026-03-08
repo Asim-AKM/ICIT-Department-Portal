@@ -21,11 +21,20 @@ namespace APIGateway_Service.Extentions
        /// <param name="app">The application builder instance used to create a service scope for applying database migrations.</param>
         public static void ApplyMigrations(this WebApplication app)
         {
-            using (var scope = app.Services.CreateScope())
+            try
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                dbContext.Database.Migrate();
+                using (var scope = app.Services.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    dbContext.Database.Migrate();
+                }
             }
+            catch (Exception)
+            {
+
+                throw;
+            }
+          
         }
     }
 }

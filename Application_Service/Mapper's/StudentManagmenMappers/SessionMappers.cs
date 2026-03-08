@@ -1,11 +1,5 @@
 ﻿using Application_Service.DTO_s.StudentDTO_s;
 using Domain_Service.Entities.StudentModule;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application_Service.Mapper_s.StudentManagmenMappers
 {
@@ -17,7 +11,8 @@ namespace Application_Service.Mapper_s.StudentManagmenMappers
               session.SessionId,
               session.Name,
               session.StartDate,
-              session.EndDate
+              session.EndDate,
+              session.Status
           )).ToList();
         }
     }
