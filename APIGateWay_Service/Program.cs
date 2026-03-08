@@ -1,9 +1,7 @@
 
 using APIGateway_Service.Extentions;
 using Application_Service.DI;
-using Infrastructure_Service.Data;
 using Infrastructure_Service.DI;
-using Microsoft.EntityFrameworkCore;
 
 namespace APIGateway_Service
 {
