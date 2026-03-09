@@ -361,7 +361,6 @@ namespace Application_Service.Services.StudentServices.Implementation
                             var user = new User
                             {
                                 UserId = student.UserId,
-                                UserName = student.StudentEmail,
                                 Email = student.StudentEmail,
                                 FullName = student.StudentName,
                                 CreatedAt = DateTime.UtcNow,
