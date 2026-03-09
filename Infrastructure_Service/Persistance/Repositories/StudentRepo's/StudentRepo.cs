@@ -3,6 +3,7 @@ using Domain_Service.RepoInterfaces.StudentManagments;
 using Infrastructure_Service.Data;
 using Infrastructure_Service.Persistance.GenericRepository;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Infrastructure_Service.Persistance.Repositories.StudentRepo_s
 {
@@ -18,5 +19,19 @@ namespace Infrastructure_Service.Persistance.Repositories.StudentRepo_s
         {
            return await _context.Students.Where(x=> x.SessionId == SessionId).ToListAsync();
         }
+
+        public async Task<List<Student>> GetStudentsByIdsAsync(List<Guid> ids)
+        {
+            return await _context.Students
+                .Where(s => ids.Contains(s.StudentId))
+                .ToListAsync();
+        }
+
+        //public async Task<List<Student>> GetStudentsByIdsAsync(List<Guid> ids, Expression<Func<Student, Guid>> keySelector)
+        //{
+        //    return await _context.Students
+        //        .Where(e => ids.Contains(keySelector.Compile().Invoke(e)))
+        //        .ToListAsync();
+        //}
     }
 }

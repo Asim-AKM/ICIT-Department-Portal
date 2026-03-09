@@ -21,6 +21,6 @@ namespace Domain_Service.RepoInterfaces.UnitOfWork
         /// <summary>
         /// Executes multiple operations in a transaction
         /// </summary>
-        Task ExecuteInTransactionAsync(Func<Task> operations);
+        Task ExecuteInTransactionAsync(Func<Task> operations, bool autosaveChanges = true);
     }
 }

@@ -1,8 +1,10 @@
 ﻿using Application_Service.Common;
 using Application_Service.DTO_s.StudentDTO_s;
 using Application_Service.DTO_s.UserManagmentDTO_s;
+using Application_Service.RequestAndResponseModel.StudentModels;
 using Application_Service.Services.AdminServices.Interfaces;
 using Application_Service.Services.StudentServices.Interfaces;
+using Domain_Service.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,7 +25,7 @@ namespace APIGateway_Service.Controllers
         /// Initializes a new instance of the <see cref="AdminController"/> class.
         /// </summary>
         /// <param name="sessionService">Service to manage session-related operations.</param>
-        public AdminController(ISessionService sessionService,IStudentService studentService)
+        public AdminController(ISessionService sessionService, IStudentService studentService)
         {
             _sessionService = sessionService;
             _studentService = studentService;
@@ -91,5 +93,30 @@ namespace APIGateway_Service.Controllers
             var response = await _studentService.GetStudentListBySessionIdAsync(sessionId);
             return StatusCode((int)response.Status, response);
         }
+
+        /// <summary>
+        /// Verify Single Student By Their Student id
+        /// </summary>
+        /// <param name="studentId"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+
+        [HttpPut("Student-Verify")]
+        public async Task<IActionResult> StudentVerify([FromQuery] Guid studentId, StudentStatus status)
+        {
+            var response = await _studentService.VerifyStudentAsync(studentId, status);
+            return StatusCode((int)response.Status, response);
+        }
+
+
+
+        [HttpPut("Student-Bulk-Verify")]
+        public async Task<IActionResult> BulkStudentsVerify([FromBody]BulkVerifyRequest bulkVerifyRequest)
+        {
+            var response = await _studentService.VerifyStudentsBulkAsync(bulkVerifyRequest);
+            return StatusCode((int)response.Status, response);
+        }
+
+
     }
 }

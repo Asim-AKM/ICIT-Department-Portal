@@ -11,6 +11,7 @@ namespace Domain_Service.RepoInterfaces.GenricRepo
         Task<T> Update(T entity);
 
         Task<string> AddRangeAsync(List<T> entities);
+        Task<string> UpdatedRangeAsync(List<T> entities);
         Task<bool> Remove(Guid id);
     }
 }

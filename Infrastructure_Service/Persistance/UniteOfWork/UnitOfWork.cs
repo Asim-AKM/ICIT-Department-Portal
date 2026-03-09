@@ -1,15 +1,8 @@
-﻿using Domain_Service.Entities.StudentModule;
-using Domain_Service.Entities.UserManagmentModule;
-using Domain_Service.RepoInterfaces.AdminRepo;
-using Domain_Service.RepoInterfaces.GenricRepo;
+﻿using Domain_Service.RepoInterfaces.AdminRepo;
 using Domain_Service.RepoInterfaces.StudentManagments;
 using Domain_Service.RepoInterfaces.UnitOfWork;
 using Domain_Service.RepoInterfaces.UserManagment;
 using Infrastructure_Service.Data;
-using Infrastructure_Service.Persistance.GenericRepository;
-using Infrastructure_Service.Persistance.Repositories.AdminRepo_s;
-using Infrastructure_Service.Persistance.Repositories.StudentRepo_s;
-using Infrastructure_Service.Persistance.Repositories.UserManagmentRepo_s;
 
 namespace Infrastructure_Service.Persistance.UniteOfWork
 {
@@ -26,7 +19,7 @@ namespace Infrastructure_Service.Persistance.UniteOfWork
         public ISemesterRepo SemesterRepo { get; }
 
         // Constructor: all dependencies injected
-        public UnitOfWork( 
+        public UnitOfWork(
             ApplicationDbContext dbContext, IUserRepo userRepo,
             IUserRoleRepo userRoleRepo,
             IUserCreadentialRepo userCreadentialRepo,
@@ -56,15 +49,20 @@ namespace Infrastructure_Service.Persistance.UniteOfWork
         /// <summary>
         /// Execute multiple repository operations in a transaction
         /// </summary>
-        public async Task ExecuteInTransactionAsync(Func<Task> operations)
+        public async Task ExecuteInTransactionAsync(Func<Task> operations, bool autosaveChanges = true)
         {
-            if (operations == null) throw new ArgumentNullException(nameof(operations));
+            if (operations == null)
+                throw new ArgumentNullException(nameof(operations));
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
             try
             {
                 await operations();
-                await SaveChangesAsync();
+                if (autosaveChanges)
+                {
+                    await SaveChangesAsync();
+                }
                 await transaction.CommitAsync();
             }
             catch

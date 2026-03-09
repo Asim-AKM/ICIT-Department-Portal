@@ -13,8 +13,15 @@ namespace Infrastructure_Service.Persistance.GenericRepository
 
         public async Task<string> AddRangeAsync(List<T> entities)
         {
-          await _dbSet.AddRangeAsync(entities);
+            await _dbSet.AddRangeAsync(entities);
             return "Data Has Been Added";
+        }
+
+
+        public  async Task<string> UpdatedRangeAsync(List<T> entities)
+        {
+             _dbSet.UpdateRange(entities);
+            return "Data Has been Updated";
         }
 
         public async Task<T> CreateAsync(T entity)

@@ -2,19 +2,19 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-
 namespace Infrastructure_Service.Persistance.Repositories.EmailRepo_s
 {
     public class EmailRepository : IEmailRepository
     {
         private static readonly string _smtpServer = "smtp.gmail.com";
-        private static readonly int _port = 587;
+        private static readonly int _port = 465;
         private static readonly string _fromEmail = "asimkhanii7777@gmail.com";
         private static readonly string _password = "gcsf lgow rkrh laxf";
         private static readonly string _fromName = "ICIT Department";
 
         public async Task<bool> SendStudentVerificationEmail(string toEmail, string studentName, string cnic, string tempPassword)
         {
+            #region HtmlBodyDesing
             var subject = "Student Account Verified - ICIT Department";
             var HTMlbody = @"<!DOCTYPE html>
                     <html>
@@ -161,6 +161,8 @@ namespace Infrastructure_Service.Persistance.Repositories.EmailRepo_s
                     </body>
                     </html>";
 
+            #endregion
+
             var body = HTMlbody
                 .Replace("{StudentName}", studentName)
                 .Replace("{TempPassword}", tempPassword)
@@ -175,23 +177,29 @@ namespace Infrastructure_Service.Persistance.Repositories.EmailRepo_s
             try
             {
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress(_fromName, _fromEmail));
-                message.To.Add(new MailboxAddress("", toEmail));
+                message.From.Add(new MailboxAddress("ICIT Department", _fromEmail));
+                message.To.Add(MailboxAddress.Parse(toEmail));
                 message.Subject = subject;
                 message.Body = new TextPart("html") { Text = body };
 
                 using var client = new SmtpClient();
-                await client.ConnectAsync(_smtpServer, _port, SecureSocketOptions.StartTls);
+
+                // USE PORT 465 (SSL)
+                await client.ConnectAsync(_smtpServer, 465, SecureSocketOptions.SslOnConnect);
+
                 await client.AuthenticateAsync(_fromEmail, _password);
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
 
-                return true; // SUCCESS
+                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false; // FAILURE
+                Console.WriteLine("Email sending failed: " + ex.Message);
+                return false;
             }
         }
     }
+
 }
+
