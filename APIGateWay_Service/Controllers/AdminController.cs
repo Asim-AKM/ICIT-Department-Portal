@@ -4,27 +4,30 @@ using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.RequestAndResponseModel.StudentModels;
 using Application_Service.Services.AdminServices.Interfaces;
 using Application_Service.Services.StudentServices.Interfaces;
-using Domain_Service.Enum;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIGateway_Service.Controllers
 {
     /// <summary>
-    /// Controller for administrative operations 
+    /// Admin controller responsible for managing sessions and student verification.
+    /// Provides endpoints for creating sessions, retrieving sessions,
+    /// fetching students by session, and verifying students individually or in bulk.
     /// </summary>
+
+    [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status500InternalServerError)]
     [Route("api/[controller]")]
     [ApiController]
     public class AdminController : ControllerBase
     {
         private readonly ISessionService _sessionService;
-
         private readonly IStudentService _studentService;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdminController"/> class.
+        /// Constructor to inject required services.
         /// </summary>
-        /// <param name="sessionService">Service to manage session-related operations.</param>
+        /// <param name="sessionService">Service responsible for session operations.</param>
+        /// <param name="studentService">Service responsible for student operations.</param>
         public AdminController(ISessionService sessionService, IStudentService studentService)
         {
             _sessionService = sessionService;
@@ -32,75 +35,49 @@ namespace APIGateway_Service.Controllers
         }
 
         /// <summary>
-        /// Creates a new academic session.
+        /// Creates a new session.
         /// </summary>
-        /// <param name="request">The session data transfer object containing session details.</param>
-        /// <returns>
-        /// Returns a response object with status code:
-        /// <list type="bullet">
-        /// <item><description>200 OK - if the session is created successfully.</description></item>
-        /// <item><description>400 Bad Request - if the input data is invalid.</description></item>
-        /// <item><description>409 Conflict - if a session with the same details already exists.</description></item>
-        /// <item><description>500 Internal Server Error - if an unexpected error occurs.</description></item>
-        /// </list>
-        /// </returns>
+        /// <param name="request">Session creation request data.</param>
+        /// <returns>Returns the created session response.</returns>
         [HttpPost("CreateSession")]
-        [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status409Conflict)]
-        [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateSession(SessionAddDto request)
         {
             var response = await _sessionService.CreateSessionAsync(request);
             return StatusCode((int)response.Status, response);
         }
-        /// <summary>
-        /// Retrieves all active sessions asynchronously.
-        /// </summary>
-        /// <remarks>This method interacts with the session service to obtain a list of sessions. The
-        /// response status reflects the outcome of the operation, including possible error conditions such as bad
-        /// requests, conflicts, or internal server errors.</remarks>
-        /// <returns>An IActionResult containing the HTTP status code and the session data. Returns a 200 OK status with the
-        /// session information if successful; otherwise, returns an appropriate error status.</returns>
 
+        /// <summary>
+        /// Retrieves all active sessions.
+        /// </summary>
+        /// <returns>List of active sessions.</returns>
         [HttpGet("Sessions")]
-        [ProducesResponseType(typeof(SessionGetDTO), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(SessionGetDTO), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetSessions()
         {
             var response = await _sessionService.GetActiveSessionsAsync();
             return StatusCode((int)response.Status, response);
         }
 
-
-
-
         /// <summary>
-        /// Retrieves the list of students associated with the specified session.
+        /// Retrieves students based on a specific session and status.
         /// </summary>
-        /// <remarks>Returns a 400 Bad Request if the sessionId is invalid, a 404 Not Found if no students
-        /// are associated with the session, or a 500 Internal Server Error for unexpected failures.</remarks>
-        /// <param name="sessionId">The unique identifier of the session for which to retrieve students. This parameter must not be null.</param>
-        /// <returns>An IActionResult containing an ApiResponse with a list of GetStudentDto objects. The response indicates the
-        /// result of the operation.</returns>
+        /// <param name="getStudentBySession">Session ID and student status filter.</param>
+        /// <returns>List of students for the specified session.</returns>
         [HttpGet("students-by-session")]
-        [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetStudentsBySessionAsync([FromQuery] GetStudentBySessionRequest getStudentBySession)
         {
             var response = await _studentService.GetStudentListBySessionIdAsync(getStudentBySession);
             return StatusCode((int)response.Status, response);
         }
 
-
         /// <summary>
-        /// Verify Single Student By Their Student id
+        /// Verifies a single student.
+        /// Creates user account, credentials, and assigns student role.
         /// </summary>
-        /// <param name="studentVerifyRequest"></param>
-        /// <returns></returns>
-
+        /// <param name="studentVerifyRequest">Student verification request.</param>
+        /// <returns>Verification result.</returns>
         [HttpPut("Student-Verify")]
         public async Task<IActionResult> StudentVerify([FromBody] StudentVerifyRequest studentVerifyRequest)
         {
@@ -108,15 +85,18 @@ namespace APIGateway_Service.Controllers
             return StatusCode((int)response.Status, response);
         }
 
-
-
+        /// <summary>
+        /// Verifies multiple students in bulk.
+        /// Only unverified students will be processed.
+        /// Already verified students will be skipped.
+        /// </summary>
+        /// <param name="bulkVerifyRequest">Bulk verification request containing student IDs and status.</param>
+        /// <returns>Bulk verification result.</returns>
         [HttpPut("Student-Bulk-Verify")]
-        public async Task<IActionResult> BulkStudentsVerify([FromBody]StudentBulkVerifyRequest bulkVerifyRequest)
+        public async Task<IActionResult> BulkStudentsVerify([FromBody] StudentBulkVerifyRequest bulkVerifyRequest)
         {
             var response = await _studentService.VerifyStudentsBulkAsync(bulkVerifyRequest);
             return StatusCode((int)response.Status, response);
         }
-
-
     }
 }
