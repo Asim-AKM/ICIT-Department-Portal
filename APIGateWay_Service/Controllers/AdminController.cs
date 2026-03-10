@@ -88,30 +88,30 @@ namespace APIGateway_Service.Controllers
         [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetStudentsBySessionAsync([FromQuery] Guid sessionId)
+        public async Task<IActionResult> GetStudentsBySessionAsync([FromQuery] GetStudentBySessionRequest getStudentBySession)
         {
-            var response = await _studentService.GetStudentListBySessionIdAsync(sessionId);
+            var response = await _studentService.GetStudentListBySessionIdAsync(getStudentBySession);
             return StatusCode((int)response.Status, response);
         }
+
 
         /// <summary>
         /// Verify Single Student By Their Student id
         /// </summary>
-        /// <param name="studentId"></param>
-        /// <param name="status"></param>
+        /// <param name="studentVerifyRequest"></param>
         /// <returns></returns>
 
         [HttpPut("Student-Verify")]
-        public async Task<IActionResult> StudentVerify([FromQuery] Guid studentId, StudentStatus status)
+        public async Task<IActionResult> StudentVerify([FromBody] StudentVerifyRequest studentVerifyRequest)
         {
-            var response = await _studentService.VerifyStudentAsync(studentId, status);
+            var response = await _studentService.VerifyStudentAsync(studentVerifyRequest);
             return StatusCode((int)response.Status, response);
         }
 
 
 
         [HttpPut("Student-Bulk-Verify")]
-        public async Task<IActionResult> BulkStudentsVerify([FromBody]BulkVerifyRequest bulkVerifyRequest)
+        public async Task<IActionResult> BulkStudentsVerify([FromBody]StudentBulkVerifyRequest bulkVerifyRequest)
         {
             var response = await _studentService.VerifyStudentsBulkAsync(bulkVerifyRequest);
             return StatusCode((int)response.Status, response);

@@ -4,5 +4,4 @@
         , string RollNo, Guid SemesterId, Guid SessionId,
         string StudentName, string StudentEmail,string CNIC,string Status);
     
-    
 }

@@ -11,8 +11,8 @@
     public enum StudentStatus
     {
        
-        Unvarified = 1,
-        Varified = 2,
+        Unverified = 1,
+        Verified = 2,
         Rejected = 3,
      
     }

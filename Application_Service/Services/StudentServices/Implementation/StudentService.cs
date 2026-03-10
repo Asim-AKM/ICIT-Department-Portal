@@ -9,6 +9,7 @@ using Application_Service.Services.StudentServices.Interfaces;
 using Azure;
 using Azure.Core;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Domain_Service.Entities.StudentModule;
 using Domain_Service.Entities.UserManagmentModule;
 using Domain_Service.Enum;
@@ -27,23 +28,23 @@ namespace Application_Service.Services.StudentServices.Implementation
             _uow = unitOfWork;
             _emailService = emailRepository;
         }
-        public async Task<ApiResponse<List<GetStudentDto>>> GetStudentListBySessionIdAsync(Guid sessionId)
+        public async Task<ApiResponse<List<GetStudentDto>>> GetStudentListBySessionIdAsync(GetStudentBySessionRequest getStudentBySessionRequest)
         {
             try
             {
                 //  Input validation
-                if (sessionId == Guid.Empty)
+                if (getStudentBySessionRequest.SessionId == Guid.Empty)
                     return ApiResponse<List<GetStudentDto>>.Fail("Invalid session identifier", ResponseType.BadRequest);
 
                 //  Fetch data 
-                var students = await _uow.StudentRepo.GetStudentListBySessionIdAsync(sessionId);
+                var students = await _uow.StudentRepo.GetStudentListBySessionIdAsync(getStudentBySessionRequest.SessionId, getStudentBySessionRequest.StudentStatus);
 
                 //  Handle empty results gracefully
                 if (students == null || !students.Any())
                 {
                     return ApiResponse<List<GetStudentDto>>.Success(
                         new List<GetStudentDto>(),
-                        "No students found for the specified session",
+                        "No students found for the specified session and StudentStatus",
                         ResponseType.Ok);
                 }
 
@@ -161,7 +162,7 @@ namespace Application_Service.Services.StudentServices.Implementation
                             RollNo = rollNo,
                             RegistrationNo = regNo,
                             CNIC = cnic,
-                            Status = StudentStatus.Unvarified,
+                            Status = StudentStatus.Unverified,
                             GPA = 0,
                             SamesterId = firstSemester.SemesterId,
                             SessionId = sessionId
@@ -181,14 +182,14 @@ namespace Application_Service.Services.StudentServices.Implementation
             }
         }
 
-        public async Task<ApiResponse<string>> VerifyStudentAsync(Guid studentId, StudentStatus studentStatus)
+        public async Task<ApiResponse<string>> VerifyStudentAsync(StudentVerifyRequest studentVerifyRequest)
         {
-            var existStudent = await _uow.StudentRepo.GetByIdAsync(studentId);
+            var existStudent = await _uow.StudentRepo.GetByIdAsync(studentVerifyRequest.StudentId);
             if (existStudent == null)
             {
                 return ApiResponse<string>.Fail("Student Not Found", ResponseType.NotFound);
             }
-            if (existStudent.Status == StudentStatus.Varified)
+            if (existStudent.Status == StudentStatus.Verified)
             {
                 return ApiResponse<string>.Fail("Student Already Verified", ResponseType.BadRequest);
             }
@@ -224,7 +225,7 @@ namespace Application_Service.Services.StudentServices.Implementation
                     await _uow.UserRoleRepo.CreateAsync(role);
 
                     //  Update Student Status
-                    existStudent.Status = studentStatus;
+                    existStudent.Status = studentVerifyRequest.Status;
                     await _uow.StudentRepo.Update(existStudent);
 
                     //  Send Email 
@@ -251,6 +252,98 @@ namespace Application_Service.Services.StudentServices.Implementation
 
 
         #region VerfisySimpleMethod
+
+        //   public async Task<ApiResponse<BulkVerifyResultResponse>> VerifyStudentsBulkAsync(BulkVerifyRequest bulkVerifyRequest)
+        //        {
+        //            //var students = await _uow.StudentRepo.GetStudentsByIdsAsync(bulkVerifyRequest.StudentIds, s => s.StudentId);
+
+        //            var students = await _uow.StudentRepo.GetStudentsByIdsAsync(bulkVerifyRequest.StudentIds);
+
+        //            if (!students.Any())
+        //                return ApiResponse<BulkVerifyResultResponse>.Fail("No students found", ResponseType.NotFound);
+
+        //            var result = new BulkVerifyResultResponse { Total = students.Count };
+        //        var emailQueue = new List<(string email, string name, string cnic, string password)>();
+
+        //        var usersToAdd = new List<User>();
+        //        var credsToAdd = new List<UserCredential>();
+        //        var rolesToAdd = new List<UserRole>();
+        //        var studentsToUpdate = new List<Student>();
+
+        //            try
+        //            {
+        //                await _uow.ExecuteInTransactionAsync(async () =>
+        //                {
+        //            foreach (var student in students)
+        //            {
+        //                if (student.Status == StudentStatus.Varified)
+        //                {
+        //                    result.AlreadyVerified.Add(student.StudentName);
+        //                    continue;
+        //                }
+
+        //                try
+        //                {
+        //                    var tempPass = PasswordGenerator.Generate();
+
+        //                    var user = new User
+        //                    {
+        //                        UserId = student.UserId,
+        //                        Email = student.StudentEmail,
+        //                        FullName = student.StudentName,
+        //                        CreatedAt = DateTime.UtcNow,
+        //                        Status = UserStatus.Active
+        //                    };
+
+        //                    usersToAdd.Add(user);
+        //                    credsToAdd.Add(user.MapToCreadDomain(tempPass));
+        //                    rolesToAdd.Add(user.MapToUserRoleDomain(RoleType.Students));
+
+        //                    student.Status = bulkVerifyRequest.Status;
+        //                    studentsToUpdate.Add(student);
+
+        //                    emailQueue.Add((student.StudentEmail, student.StudentName, student.CNIC, tempPass));
+
+        //                    result.Success++;
+        //                }
+        //                catch
+        //                {
+        //                    result.Failed++;
+        //                    result.FailedStudents.Add(student.StudentName);
+        //                }
+        //            }
+
+        //            // Bulk insert
+        //            if (usersToAdd.Any())
+        //                await _uow.UserRepo.AddRangeAsync(usersToAdd);
+        //            if (credsToAdd.Any())
+        //                await _uow.UserCreadentialRepo.AddRangeAsync(credsToAdd);
+        //            if (rolesToAdd.Any())
+        //                await _uow.UserRoleRepo.AddRangeAsync(rolesToAdd);
+
+        //            if (studentsToUpdate.Any())
+        //                await _uow.StudentRepo.UpdatedRangeAsync(studentsToUpdate);
+
+        //        }, autosaveChanges: false);
+
+        //                // Save all DB changes at once
+        //                await _uow.SaveChangesAsync();
+
+        //                // Send emails after commit
+        //                foreach (var mail in emailQueue)
+        //                {
+        //                    await _emailService.SendStudentVerificationEmail(mail.email, mail.name, mail.cnic, mail.password);
+        //    }
+
+        //                return ApiResponse<BulkVerifyResultResponse>.Success(result, "Student Bulk verification completed", ResponseType.Ok);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //    return ApiResponse<BulkVerifyResultResponse>.Fail(
+        //        $"Bulk verification failed: {ex.Message}",
+        //        ResponseType.BadRequest);
+        //}
+        //        }
 
         //public async Task<ApiResponse<string>> VerifyStudentsBulkAsync(List<Guid> studentIds, StudentStatus studentStatus)
         //{
@@ -324,39 +417,48 @@ namespace Application_Service.Services.StudentServices.Implementation
 
         #endregion
 
-
-        public async Task<ApiResponse<BulkVerifyResultResponse>> VerifyStudentsBulkAsync(BulkVerifyRequest bulkVerifyRequest)
+        public async Task<ApiResponse<BulkVerifyResultResponse>> VerifyStudentsBulkAsync(StudentBulkVerifyRequest bulkVerifyRequest)
         {
-            //var students = await _uow.StudentRepo.GetStudentsByIdsAsync(bulkVerifyRequest.StudentIds, s => s.StudentId);
-
             var students = await _uow.StudentRepo.GetStudentsByIdsAsync(bulkVerifyRequest.StudentIds);
 
-            if (!students.Any())
+            if (students == null || !students.Any())
                 return ApiResponse<BulkVerifyResultResponse>.Fail("No students found", ResponseType.NotFound);
 
-            var result = new BulkVerifyResultResponse { Total = students.Count };
-            var emailQueue = new List<(string email, string name, string cnic, string password)>();
+            var result = new BulkVerifyResultResponse
+            {
+                Total = students.Count
+            };
+
+            // Separate students
+            var alreadyVerified = students
+                .Where(s => s.Status == StudentStatus.Verified)
+                .ToList();
+
+            var studentsToProcess = students
+                .Where(s => s.Status == StudentStatus.Unverified)
+                .ToList();
+
+            result.AlreadyVerified.AddRange(alreadyVerified.Select(s => s.StudentName));
+
+            if (!studentsToProcess.Any())
+                return ApiResponse<BulkVerifyResultResponse>.Success(result, "All students already verified", ResponseType.Ok);
 
             var usersToAdd = new List<User>();
             var credsToAdd = new List<UserCredential>();
             var rolesToAdd = new List<UserRole>();
             var studentsToUpdate = new List<Student>();
 
+            var emailQueue = new List<(string email, string name, string cnic, string password)>();
+
             try
             {
                 await _uow.ExecuteInTransactionAsync(async () =>
                 {
-                    foreach (var student in students)
+                    foreach (var student in studentsToProcess)
                     {
-                        if (student.Status == StudentStatus.Varified)
-                        {
-                            result.AlreadyVerified.Add(student.StudentName);
-                            continue;
-                        }
-
                         try
                         {
-                            var tempPass = PasswordGenerator.Generate();
+                            var tempPassword = PasswordGenerator.Generate();
 
                             var user = new User
                             {
@@ -368,13 +470,13 @@ namespace Application_Service.Services.StudentServices.Implementation
                             };
 
                             usersToAdd.Add(user);
-                            credsToAdd.Add(user.MapToCreadDomain(tempPass));
+                            credsToAdd.Add(user.MapToCreadDomain(tempPassword));
                             rolesToAdd.Add(user.MapToUserRoleDomain(RoleType.Students));
 
                             student.Status = bulkVerifyRequest.Status;
                             studentsToUpdate.Add(student);
 
-                            emailQueue.Add((student.StudentEmail, student.StudentName, student.CNIC, tempPass));
+                            emailQueue.Add((student.StudentEmail, student.StudentName, student.CNIC, tempPassword));
 
                             result.Success++;
                         }
@@ -385,11 +487,12 @@ namespace Application_Service.Services.StudentServices.Implementation
                         }
                     }
 
-                    // Bulk insert
                     if (usersToAdd.Any())
                         await _uow.UserRepo.AddRangeAsync(usersToAdd);
+
                     if (credsToAdd.Any())
                         await _uow.UserCreadentialRepo.AddRangeAsync(credsToAdd);
+
                     if (rolesToAdd.Any())
                         await _uow.UserRoleRepo.AddRangeAsync(rolesToAdd);
 
@@ -398,16 +501,22 @@ namespace Application_Service.Services.StudentServices.Implementation
 
                 }, autosaveChanges: false);
 
-                // Save all DB changes at once
                 await _uow.SaveChangesAsync();
 
-                // Send emails after commit
+                // Send emails after DB commit
                 foreach (var mail in emailQueue)
                 {
-                    await _emailService.SendStudentVerificationEmail(mail.email, mail.name, mail.cnic, mail.password);
+                    await _emailService.SendStudentVerificationEmail(
+                        mail.email,
+                        mail.name,
+                        mail.cnic,
+                        mail.password);
                 }
 
-                return ApiResponse<BulkVerifyResultResponse>.Success(result, "Student Bulk verification completed", ResponseType.Ok);
+                return ApiResponse<BulkVerifyResultResponse>.Success(
+                    result,
+                    "Student bulk verification completed successfully",
+                    ResponseType.Ok);
             }
             catch (Exception ex)
             {
@@ -416,5 +525,6 @@ namespace Application_Service.Services.StudentServices.Implementation
                     ResponseType.BadRequest);
             }
         }
+
     }
 }
