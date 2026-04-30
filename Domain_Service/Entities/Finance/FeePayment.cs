@@ -14,7 +14,7 @@ namespace Domain_Service.Entities.Finance
         public Guid PaymentId { get; set; }
         public Guid StudentId { get; set; }
         public Guid FeeRecordId { get; set; }
-        public decimal AmountPaid { get; set; }
+        public float AmountPaid { get; set; }
         public DateTime PaymentDate { get; set; }
         public string PaymentMethod { get; set; } = string.Empty; // Cash, Bank Transfer, Credit Card
         public string TransactionId { get; set; } = string.Empty;
