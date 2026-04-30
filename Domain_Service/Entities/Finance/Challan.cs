@@ -15,7 +15,7 @@ namespace Domain_Service.Entities.Finance
         public string ChallanNumber { get; set; } = string.Empty;
         public Guid StudentId { get; set; }
         public Guid SemesterId { get; set; }
-        public decimal Amount { get; set; }
+        public float Amount { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime GeneratedDate { get; set; }
         public ChallanStatus Status { get; set; } // Pending, Paid, Expired
