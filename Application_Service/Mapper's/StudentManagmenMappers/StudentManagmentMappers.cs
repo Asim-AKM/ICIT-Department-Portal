@@ -1,5 +1,5 @@
 ﻿using Application_Service.DTO_s.StudentDTO_s;
-using Domain_Service.Entities.StudentModule;
+using Domain_Service.Entities.Academic;
 using Domain_Service.Enum;
 
 namespace Application_Service.Mapper_s.StudentManagmenMappers

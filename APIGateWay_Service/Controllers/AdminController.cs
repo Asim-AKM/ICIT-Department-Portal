@@ -4,6 +4,7 @@ using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.RequestAndResponseModel.StudentModels;
 using Application_Service.Services.AdminServices.Interfaces;
 using Application_Service.Services.StudentServices.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIGateway_Service.Controllers
@@ -14,6 +15,7 @@ namespace APIGateway_Service.Controllers
     /// fetching students by session, and verifying students individually or in bulk.
     /// </summary>
 
+    
     [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status500InternalServerError)]
     [Route("api/[controller]")]

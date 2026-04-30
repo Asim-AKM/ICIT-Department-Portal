@@ -16,8 +16,9 @@
                 app.MapOpenApi();
             }
 
-            app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
+            app.UseHttpsRedirection();
             app.MapControllers();
             return app;
         }

@@ -2,7 +2,7 @@
 using Application_Service.DTO_s.StudentDTO_s;
 using Application_Service.Mapper_s.StudentManagmenMappers;
 using Application_Service.Services.AdminServices.Interfaces;
-using Domain_Service.Entities.StudentModule;
+using Domain_Service.Entities.Academic;
 using Domain_Service.Enum;
 using Domain_Service.RepoInterfaces.UnitOfWork;
 

@@ -1,13 +1,15 @@
-﻿using Domain_Service.Enum;
+﻿using Domain_Service.Entities.Finance;
+using Domain_Service.Enum;
 using System.ComponentModel.DataAnnotations;
 
-namespace Domain_Service.Entities.StudentModule
+namespace Domain_Service.Entities.Academic
 {
     public class Student
     {
         [Key]
         public Guid StudentId { get; set; }
         public Guid UserId { get; set; }
+        public Guid DepartmentId { get; set; }
         public string StudentName { get; set; }= string.Empty;
         public string StudentEmail { get; set; } = string.Empty;
         public string RollNo { get; set; } = string.Empty;

@@ -1,17 +1,12 @@
 ﻿using Application_Service.Common;
 using Application_Service.DTO_s.StudentDTO_s;
-using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.Mapper_s.StudentManagmenMappers;
 using Application_Service.Mapper_s.UserManagmentMappers;
 using Application_Service.RequestAndResponseModel.StudentModels;
-using Application_Service.Services.AdminServices.Interfaces;
 using Application_Service.Services.StudentServices.Interfaces;
-using Azure;
-using Azure.Core;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Domain_Service.Entities.StudentModule;
-using Domain_Service.Entities.UserManagmentModule;
+using Domain_Service.Entities.Academic;
+using Domain_Service.Entities.Identity;
 using Domain_Service.Enum;
 using Domain_Service.RepoInterfaces.EmailRepo;
 using Domain_Service.RepoInterfaces.UnitOfWork;
@@ -59,7 +54,7 @@ namespace Application_Service.Services.StudentServices.Implementation
                     "Students retrieved successfully",
                     ResponseType.Ok);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
 
@@ -191,12 +186,10 @@ namespace Application_Service.Services.StudentServices.Implementation
             var user = new User
             {
                 UserId = existStudent.UserId,
-                UserName = "",
-                Contact = "",
                 CreatedAt = DateTime.Now,
                 Email = existStudent.StudentEmail,
                 FullName = existStudent.StudentName,
-                ImageUrl = "",
+                CNIC = existStudent.CNIC,
                 Status = UserStatus.Active
             };
             try
@@ -289,7 +282,8 @@ namespace Application_Service.Services.StudentServices.Implementation
                                 Email = student.StudentEmail,
                                 FullName = student.StudentName,
                                 CreatedAt = DateTime.UtcNow,
-                                Status = UserStatus.Active
+                                CNIC = student.CNIC,
+                                Status = UserStatus.Active,
                             };
 
                             usersToAdd.Add(user);

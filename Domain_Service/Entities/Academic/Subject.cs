@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain_Service.Entities.FacultyModule
+namespace Domain_Service.Entities.Academic
 {
     public class Subject
     {

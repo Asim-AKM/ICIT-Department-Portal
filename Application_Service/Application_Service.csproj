@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Security\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="ClosedXML" />
     <PackageReference Include="EPPlus" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />

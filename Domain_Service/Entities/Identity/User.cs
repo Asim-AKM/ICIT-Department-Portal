@@ -1,7 +1,7 @@
 ﻿using Domain_Service.Enum;
 using System.ComponentModel.DataAnnotations;
 
-namespace Domain_Service.Entities.UserManagmentModule
+namespace Domain_Service.Entities.Identity
 {
     public class User
     {
@@ -11,8 +11,9 @@ namespace Domain_Service.Entities.UserManagmentModule
         public string UserName { get; set; }=string.Empty;
         public string Email { get; set; }=string.Empty;
         public string Contact { get; set; }=string.Empty;
+        public string CNIC { get; set; } = string.Empty;
         public string ImageUrl { get; set; }=string.Empty;
-        public UserStatus Status { get; set; } = UserStatus.Active;
+        public UserStatus Status { get; set; }
         public DateTime  CreatedAt { get; set; }
     }
 }

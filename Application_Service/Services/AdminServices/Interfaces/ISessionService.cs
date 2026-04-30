@@ -1,6 +1,5 @@
 ﻿using Application_Service.Common;
 using Application_Service.DTO_s.StudentDTO_s;
-using Domain_Service.Entities.StudentModule;
 
 namespace Application_Service.Services.AdminServices.Interfaces
 {

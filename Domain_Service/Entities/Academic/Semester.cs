@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Domain_Service.Entities.StudentModule
+namespace Domain_Service.Entities.Academic
 {
     public class Semester
     {
@@ -23,5 +23,6 @@ namespace Domain_Service.Entities.StudentModule
         // Navigation property
         public Session Session { get; set; } = null!;
     }
+
 
 }

@@ -1,7 +1,7 @@
 ﻿using Domain_Service.Enum;
 using System.ComponentModel.DataAnnotations;
 
-namespace Domain_Service.Entities.StudentModule
+namespace Domain_Service.Entities.Academic
 {
     public class Session
     {

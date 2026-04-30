@@ -1,8 +1,8 @@
-﻿using Domain_Service.Entities.AnnouncementAndDownload;
-using Domain_Service.Entities.FacultyModule;
-using Domain_Service.Entities.FYPPropsalModule;
-using Domain_Service.Entities.StudentModule;
-using Domain_Service.Entities.UserManagmentModule;
+﻿using Domain_Service.Entities.Academic;
+using Domain_Service.Entities.Finance;
+using Domain_Service.Entities.FYP;
+using Domain_Service.Entities.Identity;
+using Domain_Service.Entities.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure_Service.Data
@@ -20,11 +20,10 @@ namespace Infrastructure_Service.Data
         public DbSet<Session> Sessions { get; set; }
         public DbSet<Faculty> Faculties  { get; set; }
         public DbSet<Subject> Subjects { get; set; }
-        public DbSet<FYPTeam> FYPTeams { get; set; }    
-        public DbSet<Proposal> Proposals { get; set; }
+        public DbSet<ProposalTeamMember> ProposalTeamMembers { get; set; }    
+        public DbSet<FYPProposal> FYPProposals { get; set; }
         public DbSet<Download> Downloads { get; set; }
         public DbSet<Announcement> Announcements { get; set; } 
-        public DbSet<Project> Projects { get; set; }
 
     }
 }

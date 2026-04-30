@@ -1,5 +1,5 @@
 ﻿using Application_Service.DTO_s.UserManagmentDTO_s;
-using Domain_Service.Entities.UserManagmentModule;
+using Domain_Service.Entities.Identity;
 using Domain_Service.Enum;
 
 namespace Application_Service.Mapper_s.UserManagmentMappers
