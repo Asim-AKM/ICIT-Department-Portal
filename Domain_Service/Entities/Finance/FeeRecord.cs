@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain_Service.Entities.StudentModule
+namespace Domain_Service.Entities.Finance
 {
     public class FeeRecord
     {

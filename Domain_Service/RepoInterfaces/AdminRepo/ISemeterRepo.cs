@@ -1,4 +1,4 @@
-﻿using Domain_Service.Entities.StudentModule;
+﻿using Domain_Service.Entities.Academic;
 using Domain_Service.RepoInterfaces.GenricRepo;
 
 namespace Domain_Service.RepoInterfaces.AdminRepo

@@ -1,4 +1,4 @@
-﻿using Domain_Service.Entities.UserManagmentModule;
+﻿using Domain_Service.Entities.Identity;
 using Domain_Service.RepoInterfaces.UserManagment;
 using Infrastructure_Service.Data;
 using Infrastructure_Service.Persistance.GenericRepository;

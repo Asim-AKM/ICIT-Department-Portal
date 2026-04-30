@@ -2,16 +2,20 @@
 using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.Services.AdminServices.Interfaces;
 using Application_Service.Services.StudentServices.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIGateway_Service.Controllers
 {
-   /// <summary>
-   /// Handles operations related to clerical tasks, including uploading bulk student data for processing in the current
-   /// session.
-   /// </summary>
-   /// <remarks>This controller is responsible for managing student-related operations and requires services
-   /// for session and student management.</remarks>
+    /// <summary>
+    /// Handles operations related to clerical tasks, including uploading bulk student data for processing in the current
+    /// session.
+    /// </summary>
+    /// <remarks>This controller is responsible for managing student-related operations and requires services
+    /// for session and student management.</remarks>
+    /// 
+
+    
     [Route("api/[controller]")]
     [ApiController]
     public class ClerkController : ControllerBase

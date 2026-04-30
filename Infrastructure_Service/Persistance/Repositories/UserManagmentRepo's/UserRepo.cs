@@ -1,4 +1,4 @@
-﻿using Domain_Service.Entities.UserManagmentModule;
+﻿using Domain_Service.Entities.Identity;
 using Domain_Service.RepoInterfaces.UserManagment;
 using Infrastructure_Service.Data;
 using Infrastructure_Service.Persistance.GenericRepository;
@@ -14,9 +14,9 @@ namespace Infrastructure_Service.Persistance.Repositories.UserManagmentRepo_s
             _context = context;
         }
 
-        public Task<User?> GetByIdentifier(string useridentifier)
+        public async  Task<User?> GetByIdentifier(string useridentifier)
         {
-           return _context.Users.Where(u => u.UserName == useridentifier || u.Email == useridentifier || u.Contact == useridentifier).FirstOrDefaultAsync();
+           return await _context.Users.Where(u => u.CNIC == useridentifier).FirstOrDefaultAsync();
         }
     }
 }

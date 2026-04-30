@@ -30,8 +30,9 @@ namespace APIGateway_Service
             builder.Services.AddOpenApi();
 
             builder.Services.AddSwaggerConfigration();
+            builder.Services.AddJwtValidation(builder.Configuration);
 
-            builder.Services.AddApplicationDI();
+            builder.Services.AddApplicationDI(builder.Configuration);
             builder.Services.InfrastructureDIConfigur(builder.Configuration);
 
 

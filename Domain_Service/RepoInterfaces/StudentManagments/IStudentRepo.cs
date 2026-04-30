@@ -1,4 +1,4 @@
-﻿using Domain_Service.Entities.StudentModule;
+﻿using Domain_Service.Entities.Academic;
 using Domain_Service.Enum;
 using Domain_Service.RepoInterfaces.GenricRepo;
 using Microsoft.EntityFrameworkCore;

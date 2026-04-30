@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application_Service.Common;
+using Application_Service.RequestAndResponseModel.AuthenticationModels;
 
 namespace Application_Service.Services.UserManagmentServices.Interfaces
 {
     public interface IAuthenticationServce
     {
-
+        Task<ApiResponse<string>> UserLogin(UserLoginRequest loginRequest);
     }
 }

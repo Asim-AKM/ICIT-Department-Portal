@@ -1,10 +1,5 @@
 ﻿using Application_Service.Services.UserManagmentServices.Implementation;
-using Domain_Service.Entities.UserManagmentModule;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Domain_Service.Entities.Identity;
 
 namespace Application_Service.Mapper_s.UserManagmentMappers
 {

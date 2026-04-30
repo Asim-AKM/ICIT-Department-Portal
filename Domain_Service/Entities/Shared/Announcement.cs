@@ -5,12 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain_Service.Entities.AnnouncementAndDownload
+namespace Domain_Service.Entities.Shared
 {
     public class Announcement
     {
         [Key]
-        public Guid AnnouncementId { get; set; }
+        public Guid AnnouncmentId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public Guid PostedBy { get; set; }
