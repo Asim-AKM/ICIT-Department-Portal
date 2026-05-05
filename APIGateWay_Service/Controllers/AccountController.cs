@@ -1,5 +1,6 @@
 ﻿using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.Services.UserManagmentServices.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APIGateway_Service.Controllers
@@ -41,6 +42,7 @@ namespace APIGateway_Service.Controllers
         ///     "role": "Admin"
         /// }
         /// </remarks>
+       
         [HttpPost("Account")]
         [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status400BadRequest)]

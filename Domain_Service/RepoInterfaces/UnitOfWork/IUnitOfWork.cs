@@ -1,4 +1,5 @@
 ﻿using Domain_Service.RepoInterfaces.AdminRepo;
+using Domain_Service.RepoInterfaces.DeptRepo;
 using Domain_Service.RepoInterfaces.StudentManagments;
 using Domain_Service.RepoInterfaces.UserManagment;
 
@@ -12,6 +13,7 @@ namespace Domain_Service.RepoInterfaces.UnitOfWork
         IStudentRepo StudentRepo { get; }
         ISessionRepo SessionRepo { get; }
         ISemesterRepo SemesterRepo { get; }
+        IDepartmentRepository DepartmentRepository { get; }
 
         /// <summary>
         /// Commits all changes to the database within an optional transaction

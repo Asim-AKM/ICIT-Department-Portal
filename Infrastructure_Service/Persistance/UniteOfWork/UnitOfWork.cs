@@ -1,8 +1,10 @@
 ﻿using Domain_Service.RepoInterfaces.AdminRepo;
+using Domain_Service.RepoInterfaces.DeptRepo;
 using Domain_Service.RepoInterfaces.StudentManagments;
 using Domain_Service.RepoInterfaces.UnitOfWork;
 using Domain_Service.RepoInterfaces.UserManagment;
 using Infrastructure_Service.Data;
+using Infrastructure_Service.Persistance.Repositories.DeptRepo_s;
 
 namespace Infrastructure_Service.Persistance.UniteOfWork
 {
@@ -17,6 +19,7 @@ namespace Infrastructure_Service.Persistance.UniteOfWork
         public IStudentRepo StudentRepo { get; }
         public ISessionRepo SessionRepo { get; }
         public ISemesterRepo SemesterRepo { get; }
+        public IDepartmentRepository DepartmentRepository { get; }
 
         // Constructor: all dependencies injected
         public UnitOfWork(
@@ -25,7 +28,8 @@ namespace Infrastructure_Service.Persistance.UniteOfWork
             IUserCreadentialRepo userCreadentialRepo,
             IStudentRepo studentRepo,
             ISessionRepo sessionRepo,
-            ISemesterRepo semesterRepo
+            ISemesterRepo semesterRepo,
+            IDepartmentRepository departmentRepository
          )
         {
             _dbContext = dbContext;
@@ -35,6 +39,7 @@ namespace Infrastructure_Service.Persistance.UniteOfWork
             StudentRepo = studentRepo;
             SessionRepo = sessionRepo;
             SemesterRepo = semesterRepo;
+            DepartmentRepository = departmentRepository;
 
         }
 

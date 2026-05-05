@@ -15,11 +15,17 @@ namespace Infrastructure_Service.Persistance.Repositories.AdminRepo_s
             _context = applicationDbContext;
         }
 
-        public async Task<List<Session>> GetActiveSessionsAsync()
+        public async Task<List<Session>> GetSessionsByStatusAsync(SessionStatus? status = null)
         {
-          return await  _context.Sessions.AsNoTracking()
-                .Where(x=> x.Status == SessionStatus.Active)
-                .OrderByDescending(o=> o.StartDate)
+            var query = _context.Sessions.AsNoTracking();
+
+            if (status.HasValue)
+            {
+                query = query.Where(x => x.Status == status.Value);
+            }
+
+            return await query
+                .OrderByDescending(o => o.StartDate)
                 .ToListAsync();
         }
     }

@@ -66,7 +66,23 @@ namespace APIGateway_Service.Extentions
                             ValidateIssuerSigningKey = true,
                             ValidIssuer = configuration["JwtSettings:Issuer"],
                             ValidAudience = configuration["JwtSettings:Audience"],
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]!))
+                            IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]!))
+                        };
+
+                        // 🔥 ADD THIS BLOCK (IMPORTANT) 
+                        // Read Only Http cookies Auto
+                        options.Events = new JwtBearerEvents
+                        {
+                            OnMessageReceived = context =>
+                            {
+                                var token = context.Request.Cookies["jwt"];
+                                if (!string.IsNullOrEmpty(token))
+                                {
+                                    context.Token = token;
+                                }
+                                return Task.CompletedTask;
+                            }
                         };
                     });
 

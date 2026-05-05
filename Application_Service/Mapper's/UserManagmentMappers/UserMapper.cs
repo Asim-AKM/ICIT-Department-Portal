@@ -16,8 +16,21 @@ namespace Application_Service.Mapper_s.UserManagmentMappers
                 Email = createUserDto.Email,
                 Contact = string.Empty, // Default value, can be updated later
                 ImageUrl = string.Empty, // Default value, can be updated later
-                Status = UserStatus.Active, //Defual status for new users
+                Status = UserStatus.Active, //Defual status for new users,
+                CNIC = createUserDto.CNIC,
+                DepartmentId = createUserDto.DepartmentId
             };
+        }
+
+
+
+        public static CreateUserResponseDto MapToResponse(this User createUserDto)
+        {
+            return new CreateUserResponseDto(
+                createUserDto.Email,
+                createUserDto.UserName,
+                createUserDto.FullName
+            );
         }
 
     }
