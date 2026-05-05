@@ -4,13 +4,14 @@ using Domain_Service.Entities.Finance;
 using Domain_Service.Entities.FYP;
 using Domain_Service.Entities.Identity;
 using Domain_Service.Entities.Shared;
+using Infrastructure_Service.Data.SeedData.Infrastructure_Service.Data.SeedData;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure_Service.Data
 {
-    public class ApplicationDbContext :DbContext
+    public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContext) : base(dbContext){ }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContext) : base(dbContext) { }
 
         // Identity related DbSets
         public DbSet<User> Users { get; set; }
@@ -21,7 +22,7 @@ namespace Infrastructure_Service.Data
         public DbSet<Clerk> Clerks { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
-        public DbSet<Faculty> Faculties  { get; set; }
+        public DbSet<Faculty> Faculties { get; set; }
         public DbSet<Grade> Grades { get; set; }
         public DbSet<Semester> Semesters { get; set; }
         public DbSet<Session> Sessions { get; set; }
@@ -39,7 +40,7 @@ namespace Infrastructure_Service.Data
         //FYP related DbSets
         public DbSet<FYPProposal> FYPProposals { get; set; }
         public DbSet<ProposalTeamMember> ProposalTeamMembers { get; set; }
-        public DbSet<FinalEvaluation> FinalEvaluations { get; set; }    
+        public DbSet<FinalEvaluation> FinalEvaluations { get; set; }
         public DbSet<FYPMilestone> FYPMilestones { get; set; }
         public DbSet<SupervisionMeeting> SupervisionMeetings { get; set; }
         // Shared related DbSets
@@ -52,8 +53,12 @@ namespace Infrastructure_Service.Data
 
 
 
-
-
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // ✅ Seed Departments
+            var departments = DepartmentSeed.GetDepartments();
+            modelBuilder.Entity<Department>().HasData(departments);
+        }
 
     }
 }

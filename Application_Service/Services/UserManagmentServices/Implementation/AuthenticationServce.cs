@@ -47,8 +47,8 @@ namespace Application_Service.Services.UserManagmentServices.Implementation
             var token = await _jwtService.GenerateJwtToken(user, roles);
 
             return ApiResponse<string>.Success(
-                "Login successful",
                 token,
+                "Login successful",
                 ResponseType.Ok);
         }
     }

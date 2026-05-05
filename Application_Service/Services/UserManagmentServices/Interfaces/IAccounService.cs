@@ -6,6 +6,6 @@ namespace Application_Service.Services.UserManagmentServices.Interfaces
 {
     public interface IAccounService
     {
-        Task<ApiResponse<CreateUserDto>> CreateAccount(CreateUserDto createUserDto,RoleType role);
+        Task<ApiResponse<CreateUserResponseDto>> CreateAccount(CreateUserDto request, RoleType role);
     }
 }

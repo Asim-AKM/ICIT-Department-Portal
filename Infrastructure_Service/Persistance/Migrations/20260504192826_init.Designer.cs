@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure_Service.Persistance.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260430213850_update-DatabaseScheemaAddedrequiredEntities")]
-    partial class updateDatabaseScheemaAddedrequiredEntities
+    [Migration("20260504192826_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,6 +74,40 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.HasKey("DepartmentId");
 
                     b.ToTable("Departments");
+
+                    b.HasData(
+                        new
+                        {
+                            DepartmentId = new Guid("19536958-3ab4-44e4-8848-104dfd93aaf8"),
+                            Code = "CS",
+                            Description = "Department of Computer Science - Offers BSCS & MSCS programs",
+                            Name = "Computer Science",
+                            Status = 1
+                        },
+                        new
+                        {
+                            DepartmentId = new Guid("2b1c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e"),
+                            Code = "SE",
+                            Description = "Department of Software Engineering - Offers BSSE & MSSE programs",
+                            Name = "Software Engineering",
+                            Status = 1
+                        },
+                        new
+                        {
+                            DepartmentId = new Guid("3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f"),
+                            Code = "AI",
+                            Description = "Department of Artificial Intelligence - Offers BSAI & MSAI programs",
+                            Name = "Artificial Intelligence",
+                            Status = 1
+                        },
+                        new
+                        {
+                            DepartmentId = new Guid("4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a"),
+                            Code = "CE",
+                            Description = "Department of Computer Engineering - Offers BSCE & MSCE programs",
+                            Name = "Computer Engineering",
+                            Status = 1
+                        });
                 });
 
             modelBuilder.Entity("Domain_Service.Entities.Academic.Enrollment", b =>
@@ -615,6 +649,9 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -635,6 +672,8 @@ namespace Infrastructure_Service.Persistance.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Users");
                 });
@@ -836,6 +875,20 @@ namespace Infrastructure_Service.Persistance.Migrations
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain_Service.Entities.Identity.User", b =>
+                {
+                    b.HasOne("Domain_Service.Entities.Academic.Department", "Department")
+                        .WithMany("Users")
+                        .HasForeignKey("DepartmentId");
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("Domain_Service.Entities.Academic.Department", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Domain_Service.Entities.Academic.Faculty", b =>

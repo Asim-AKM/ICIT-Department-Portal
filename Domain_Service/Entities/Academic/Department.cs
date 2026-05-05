@@ -1,4 +1,5 @@
-﻿using Domain_Service.Enum;
+﻿using Domain_Service.Entities.Identity;
+using Domain_Service.Enum;
 using System.ComponentModel.DataAnnotations;
 
 namespace Domain_Service.Entities.Academic
@@ -15,5 +16,7 @@ namespace Domain_Service.Entities.Academic
         public string Description { get; set; } = string.Empty;
 
         public DepartmentStatus Status { get; set; }  // Active / Inactive
+
+        public ICollection<User> Users {get; set; } // Navigation property to Users in this department
     }
 }

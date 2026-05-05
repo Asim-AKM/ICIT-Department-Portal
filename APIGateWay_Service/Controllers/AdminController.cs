@@ -4,6 +4,7 @@ using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.RequestAndResponseModel.StudentModels;
 using Application_Service.Services.AdminServices.Interfaces;
 using Application_Service.Services.StudentServices.Interfaces;
+using Domain_Service.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +16,7 @@ namespace APIGateway_Service.Controllers
     /// fetching students by session, and verifying students individually or in bulk.
     /// </summary>
 
-    
+
     [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(CreateUserDto), StatusCodes.Status500InternalServerError)]
     [Route("api/[controller]")]
@@ -50,15 +51,60 @@ namespace APIGateway_Service.Controllers
             return StatusCode((int)response.Status, response);
         }
 
+        // Generic update (Recommended)
         /// <summary>
-        /// Retrieves all active sessions.
+        /// Updates the status of a session.
+        /// </summary>
+        /// <param name="request">Session status update request.</param>
+        /// <returns>Returns the result of the update operation.</returns>
+        [HttpPut("UpdateSessionStatus/{sessionId}")]
+        public async Task<IActionResult> UpdateSessionStatus([FromBody] SessionStatusUpdateDto request)
+        {
+            var result = await _sessionService.UpdateSessionStatus(request.SessionId, request.Status);
+            return Ok(result);
+        }
+
+
+
+        /// <summary>
+        /// Retrieves all sessions Active , InActive , Complete
         /// </summary>
         /// <returns>List of active sessions.</returns>
         [HttpGet("Sessions")]
         public async Task<IActionResult> GetSessions()
         {
-            var response = await _sessionService.GetActiveSessionsAsync();
+            var response = await _sessionService.GetAllSessionsAsync();
             return StatusCode((int)response.Status, response);
+        }
+
+
+        /// <summary>
+        /// Retrieves specific sessions Active , InActive , Complete
+        /// </summary>
+        /// <returns>List of active sessions.</returns>
+        [HttpGet("GetSession-by-Status")]
+        public async Task<IActionResult> GetSessionBySessionStatus(SessionStatus? sessionStatus)
+        {
+            if (sessionStatus == SessionStatus.Active)
+            {
+                var response = await _sessionService.GetActiveSessionsAsync();
+                return StatusCode((int)response.Status, response);
+            }
+            else if (sessionStatus == SessionStatus.Inactive)
+            {
+                var response = await _sessionService.GetInActiveSessionsAsync();
+                return StatusCode((int)response.Status, response);
+            }
+            else if (sessionStatus == SessionStatus.Completed)
+            {
+                var response = await _sessionService.GetCompleteSessionsAsync();
+                return StatusCode((int)response.Status, response);
+            }
+            else
+            {
+                var response = await _sessionService.GetAllSessionsAsync();
+                return StatusCode((int)response.Status, response);
+            }
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.Mapper_s.UserManagmentMappers;
 using Application_Service.Services.UserManagmentServices.Interfaces;
 using Domain_Service.Enum;
+using Domain_Service.RepoInterfaces.EmailRepo;
 using Domain_Service.RepoInterfaces.UnitOfWork;
 
 namespace Application_Service.Services.UserManagmentServices.Implementation
@@ -10,45 +11,98 @@ namespace Application_Service.Services.UserManagmentServices.Implementation
     public class AccountService : IAccounService
     {
         private readonly IUnitOfWork _uow;
-        public AccountService(IUnitOfWork unitOfWork)
+        private readonly IEmailRepository _emailService;
+        public AccountService(IUnitOfWork unitOfWork, IEmailRepository emailRepository)
         {
             this._uow = unitOfWork;
+            this._emailService = emailRepository;
         }
-        public async Task<ApiResponse<CreateUserDto>> CreateAccount(CreateUserDto request, RoleType role)
+        public async Task<ApiResponse<CreateUserResponseDto>> CreateAccount(CreateUserDto request, RoleType role)
         {
-            var emailExistance = await _uow.UserRepo.FirstOrDefaultAsync(u => u.Email == request.Email);
-            var userNameExistance = await _uow.UserRepo.FirstOrDefaultAsync(u => u.UserName == request.UserName);
-
-            // Acomulate Errors in a list 
-            if (emailExistance != null || userNameExistance != null)
-            {
-                List<string> errorsList = new List<string>();
-                if (emailExistance != null)
-                    errorsList.Add("Email Already Exist");
-                if (userNameExistance != null)
-                    errorsList.Add("UserName Already Exist");
-
-                var error = string.Join(" | ", errorsList);
-                return ApiResponse<CreateUserDto>.Fail(error, ResponseType.Conflict);
-            }
             try
             {
-                // Create User
+               
+                var existingUser = await _uow.UserRepo.FirstOrDefaultAsync(u =>
+                    u.Email == request.Email ||
+                    u.UserName == request.UserName ||
+                    u.CNIC == request.CNIC);
+
+                if (existingUser != null)
+                {
+                    var errors = new List<string>();
+
+                    if (existingUser.Email == request.Email)
+                        errors.Add("Email already registered");
+
+                    if (existingUser.UserName == request.UserName)
+                        errors.Add("Username already registered");
+
+                    if (existingUser.CNIC == request.CNIC)
+                        errors.Add("CNIC already registered");
+
+                    return ApiResponse<CreateUserResponseDto>.Fail(
+                        string.Join(" | ", errors),
+                        ResponseType.Conflict);
+                }
+
+                // 🔹 Handle temp password (record → use `with`)
+                if (request.GeneratTempPassword)
+                {
+                    request = request with
+                    {
+                        Password = PasswordGenerator.GenerateRandomPassword()
+                    };
+                }
+                var user = request.MapToDomain();
+
+                // 🔹 Create user inside transaction
                 await _uow.ExecuteInTransactionAsync(async () =>
                 {
-                    var user = request.MapToDomain();
+                 
                     await _uow.UserRepo.CreateAsync(user);
-                    var cread = user.MapToCreadDomain(request.Password);
-                    await _uow.UserCreadentialRepo.CreateAsync(cread);
-                    await _uow.UserRoleRepo.CreateAsync(user.MapToUserRoleDomain(role));
+
+                    var credential = user.MapToCreadDomain(request.Password);
+                    await _uow.UserCreadentialRepo.CreateAsync(credential);
+
+                    var userRole = user.MapToUserRoleDomain(role);
+                    await _uow.UserRoleRepo.CreateAsync(userRole);
                 });
 
-                return ApiResponse<CreateUserDto>.Success(request, "User created successfully", ResponseType.Created);
+                // 🔹 Send email AFTER successful commit
+                if (request.SendWelcomeEmail)
+                {
+                    var emailSent = await _emailService.SendAccountCreatWelcomeEmail(
+                        request.Email,
+                        request.FullName,
+                        request.UserName,
+                        request.Password,
+                        role.ToString()
+                    );
+
+                    if (!emailSent)
+                    {
+                       
+
+                        return ApiResponse<CreateUserResponseDto>.Success(
+                            user.MapToResponse(),
+                            "Email Sending Failed But User created successfully",
+                            ResponseType.Created);
+                    }
+                }
+
+                return ApiResponse<CreateUserResponseDto>.Success(
+                    user.MapToResponse(),
+                    "User created successfully",
+                    ResponseType.Created);
             }
             catch (Exception ex)
             {
+                // 🔹 Log internally, don’t expose raw exception
+                // _logger.LogError(ex, "Error creating user");
 
-                return ApiResponse<CreateUserDto>.Fail($"Failed to Create User{ex.Message}", ResponseType.BadRequest);
+                return ApiResponse<CreateUserResponseDto>.Fail(
+                    "Failed to create user",
+                    ResponseType.InternalServerError);
             }
         }
     }

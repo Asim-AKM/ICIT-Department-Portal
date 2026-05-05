@@ -2,5 +2,5 @@
 
 namespace Application_Service.DTO_s.UserManagmentDTO_s
 {
-    public record CreateUserDto(string FullName, string UserName, string Email, string Password, RoleType Role);
+    public record CreateUserDto(Guid? DepartmentId,string FullName, string UserName, string Email, string CNIC, string Password,  RoleType Role,bool GeneratTempPassword,bool SendWelcomeEmail);
 }

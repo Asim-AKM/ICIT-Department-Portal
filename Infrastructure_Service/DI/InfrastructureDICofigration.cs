@@ -1,4 +1,5 @@
 ﻿using Domain_Service.RepoInterfaces.AdminRepo;
+using Domain_Service.RepoInterfaces.DeptRepo;
 using Domain_Service.RepoInterfaces.EmailRepo;
 using Domain_Service.RepoInterfaces.GenricRepo;
 using Domain_Service.RepoInterfaces.StudentManagments;
@@ -7,6 +8,7 @@ using Domain_Service.RepoInterfaces.UserManagment;
 using Infrastructure_Service.Data;
 using Infrastructure_Service.Persistance.GenericRepository;
 using Infrastructure_Service.Persistance.Repositories.AdminRepo_s;
+using Infrastructure_Service.Persistance.Repositories.DeptRepo_s;
 using Infrastructure_Service.Persistance.Repositories.EmailRepo_s;
 using Infrastructure_Service.Persistance.Repositories.StudentRepo_s;
 using Infrastructure_Service.Persistance.Repositories.UserManagmentRepo_s;
@@ -30,7 +32,9 @@ namespace Infrastructure_Service.DI
             .AddScoped<IStudentRepo, StudentRepo>()
             .AddScoped<ISessionRepo, SessionRepo>()
             .AddScoped<ISemesterRepo, SemeterRepo>()
-            .AddScoped<IEmailRepository, EmailRepository>();
+            .AddScoped<IEmailRepository, EmailRepository>()
+            .AddScoped<IDepartmentRepository, DepartmentRepository>();
+             
 
 
 

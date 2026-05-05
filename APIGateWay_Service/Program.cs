@@ -14,12 +14,13 @@ namespace APIGateway_Service
 
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowICITDeparmentUI", policy =>
+                options.AddPolicy("AllowAngular", policy =>
                 {
                     policy
-                        .WithOrigins("https://localhost:5173")
+                        .WithOrigins("http://localhost:4200")
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
             });
 
@@ -41,9 +42,10 @@ namespace APIGateway_Service
             // Automatically apply pending migrations
             app.ApplyMigrations();
 
+            app.UseCors("AllowAngular");
+            app.UseHttpsRedirection();
             // Configure the HTTP request pipeline.
             app.AddMiddlewareConfigration();
-            app.UseCors("AllowICITDeparmentUI");
             app.Run();
         }
     }
