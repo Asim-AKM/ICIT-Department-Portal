@@ -6,5 +6,6 @@ namespace Domain_Service.RepoInterfaces.UserManagment
     public interface IUserRepo : IRepository<User>
     {
         Task<User?> GetByIdentifier(string useridentifier);
+        
     }
 }

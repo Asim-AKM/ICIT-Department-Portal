@@ -30,4 +30,8 @@
     <ProjectReference Include="..\Infrastructure_Service\Infrastructure_Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="uploads\" />
+  </ItemGroup>
+
 </Project>

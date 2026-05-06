@@ -6,17 +6,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure_Service.Persistance.Repositories.UserManagmentRepo_s
 {
-    public class UserRepo :Repository<User>, IUserRepo 
+    public class UserRepo : Repository<User>, IUserRepo
     {
+       
         private readonly ApplicationDbContext _context;
-        public UserRepo(ApplicationDbContext context): base(context)
+
+        public UserRepo(ApplicationDbContext context) : base(context)
         {
+            
             _context = context;
         }
 
-        public async  Task<User?> GetByIdentifier(string useridentifier)
+        public async Task<User?> GetByIdentifier(string useridentifier)
         {
-           return await _context.Users.Where(u => u.CNIC == useridentifier).FirstOrDefaultAsync();
+            return await _context.Users
+                .Where(u => u.CNIC == useridentifier)
+                .FirstOrDefaultAsync();
         }
+
     }
 }
+

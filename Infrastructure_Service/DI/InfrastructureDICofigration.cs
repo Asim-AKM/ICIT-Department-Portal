@@ -23,18 +23,19 @@ namespace Infrastructure_Service.DI
     {
         public static IServiceCollection InfrastructureDIConfigur(this IServiceCollection service, IConfiguration configuration) => service
 
-            .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ICIT_DBConString")))
-            .AddScoped(typeof(IRepository<>), typeof(Repository<>))
-            .AddScoped<IUnitOfWork, UnitOfWork>()
-            .AddScoped<IUserRepo, UserRepo>()
-            .AddScoped<IUserRoleRepo, UserRoleRepo>()
-            .AddScoped<IUserCreadentialRepo, UserCreadentialRepo>()
-            .AddScoped<IStudentRepo, StudentRepo>()
-            .AddScoped<ISessionRepo, SessionRepo>()
-            .AddScoped<ISemesterRepo, SemeterRepo>()
-            .AddScoped<IEmailRepository, EmailRepository>()
-            .AddScoped<IDepartmentRepository, DepartmentRepository>();
-             
+        // ✅ DbContext should be registered ONCE
+        .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("ICIT_DBConString"))) 
+
+        // ✅ Register generic repository
+        .AddScoped(typeof(IRepository<>), typeof(Repository<>))
+
+        // ✅ Register UnitOfWork
+        .AddScoped<IUnitOfWork, UnitOfWork>()
+
+
+        // ✅ Only keep these if they are NOT created by UnitOfWork
+        .AddScoped<IEmailRepository, EmailRepository>();
+
 
 
 

@@ -18,5 +18,6 @@ namespace Domain_Service.Entities.Identity
         public UserStatus Status { get; set; }
         public DateTime  CreatedAt { get; set; }
         public Department? Department { get; set; } //  Navigation Property 
+        public UserRole? Role { get; set; } //  Navigation Property 
     }
 }
