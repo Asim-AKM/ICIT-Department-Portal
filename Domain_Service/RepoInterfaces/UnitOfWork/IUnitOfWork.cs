@@ -5,7 +5,7 @@ using Domain_Service.RepoInterfaces.UserManagment;
 
 namespace Domain_Service.RepoInterfaces.UnitOfWork
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork 
     {
         IUserRepo UserRepo { get; }
         IUserRoleRepo UserRoleRepo { get; }

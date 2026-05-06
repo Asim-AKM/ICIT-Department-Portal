@@ -18,7 +18,8 @@ namespace Application_Service.Mapper_s.UserManagmentMappers
                 ImageUrl = string.Empty, // Default value, can be updated later
                 Status = UserStatus.Active, //Defual status for new users,
                 CNIC = createUserDto.CNIC,
-                DepartmentId = createUserDto.DepartmentId
+                DepartmentId = createUserDto.DepartmentId,
+                CreatedAt = DateTime.Now
             };
         }
 

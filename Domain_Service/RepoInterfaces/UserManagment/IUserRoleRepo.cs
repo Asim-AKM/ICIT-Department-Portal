@@ -9,4 +9,8 @@ namespace Domain_Service.RepoInterfaces.UserManagment
 
         Task<List<RoleType>> GetUserRoleByUserId(Guid UserId);
     }
+
+
+
+
 }

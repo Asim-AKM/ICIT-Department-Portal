@@ -2,6 +2,7 @@
 using APIGateway_Service.Extentions;
 using Application_Service.DI;
 using Infrastructure_Service.DI;
+using Microsoft.Extensions.FileProviders;
 
 namespace APIGateway_Service
 {
@@ -39,11 +40,17 @@ namespace APIGateway_Service
 
             var app = builder.Build();
 
+
             // Automatically apply pending migrations
             app.ApplyMigrations();
 
             app.UseCors("AllowAngular");
             app.UseHttpsRedirection();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(),"uploads")),
+                RequestPath = "/uploads"
+            });
             // Configure the HTTP request pipeline.
             app.AddMiddlewareConfigration();
             app.Run();
