@@ -12,7 +12,7 @@ namespace Domain_Service.Entities.Academic
         [Key]
         public Guid ClerkId { get; set; }
         public Guid UserId { get; set; }
-        public string Department { get; set; } = string.Empty;
+        public Guid DepartmentId { get; set; }
         public string Designation { get; set; } = string.Empty;
         public DateTime JoiningDate { get; set; }
     }

@@ -28,9 +28,8 @@ namespace Infrastructure_Service.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Department")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Designation")
                         .IsRequired()
@@ -729,14 +728,32 @@ namespace Infrastructure_Service.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("AnnouncementTargetAudience")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AnnouncementType")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("DatePosted")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("PostedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("SendMailNotification")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("SessionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
@@ -815,8 +832,17 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.Property<string>("ActionUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("AnnouncementId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsBroadcast")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
@@ -825,16 +851,24 @@ namespace Infrastructure_Service.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("SenderUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("TargetRole")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TargetUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("NotificationId");
 

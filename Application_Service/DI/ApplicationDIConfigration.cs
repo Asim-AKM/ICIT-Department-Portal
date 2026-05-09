@@ -4,8 +4,12 @@ using Application_Service.Security.Implementation;
 using Application_Service.Security.Interface;
 using Application_Service.Services.AdminServices.Implementations;
 using Application_Service.Services.AdminServices.Interfaces;
+using Application_Service.Services.AnnouncementServices.Implementation;
+using Application_Service.Services.AnnouncementServices.Interfaces;
 using Application_Service.Services.DeptServices.Implementation;
 using Application_Service.Services.DeptServices.Interfaces;
+using Application_Service.Services.NotificationServices.Implementions;
+using Application_Service.Services.NotificationServices.Interfaces;
 using Application_Service.Services.StudentServices.Implementation;
 using Application_Service.Services.StudentServices.Interfaces;
 using Application_Service.Services.UserManagmentServices.Implementation;
@@ -27,7 +31,10 @@ namespace Application_Service.DI
             .AddScoped<ISessionService, SessionService>()
             .Configure<JWTSettings>(configuration.GetSection("JwtSettings"))
             .AddScoped<IJwtService, JwtService>()
-            .AddScoped<IDepartmentService, DepartmentService>();
+            .AddScoped<IDepartmentService, DepartmentService>()
+            .AddScoped<IAnnouncmentService, AnnouncmentService>()
+            .AddScoped<INotificationService, NotificationService>()
+            .AddScoped<IAudienceNotificationResolverService, AudienceNotificationResolverService>();
 
     }
 }

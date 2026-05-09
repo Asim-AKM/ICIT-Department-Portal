@@ -23,7 +23,22 @@ namespace Infrastructure_Service.Persistance.Repositories.UserManagmentRepo_s
                 .Where(u => u.CNIC == useridentifier)
                 .FirstOrDefaultAsync();
         }
+        public async Task<List<Guid>> GetExistingUserIdsAsync(List<Guid> userIds)
+        {
+            return await _context.Users
+                .Where(x => userIds.Contains(x.UserId))
+                .Select(x => x.UserId)
+                .ToListAsync();
+        }
 
+        public async Task<bool> ExistsByEmailOrCNICAsync(string email, string cnic)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .AnyAsync(u =>
+                    u.Email == email ||
+                    u.CNIC == cnic);
+        }
     }
 }
 
