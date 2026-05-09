@@ -17,7 +17,7 @@ namespace Domain_Service.Enum
         Admin = 1,
         Clerk = 2,
         Faculty = 3,
-        Students = 4,
+        Student = 4,
     }
     public enum StudentStatus
     {
@@ -45,12 +45,12 @@ namespace Domain_Service.Enum
     }
     public enum ProposalStatus
     {
-        Draft=1,
-        Submitted=2,
-        UnderReview=3,
-        Approved=4,
-        Rejected=5,
-        RevisionRequested=6
+        Draft = 1,
+        Submitted = 2,
+        UnderReview = 3,
+        Approved = 4,
+        Rejected = 5,
+        RevisionRequested = 6
     }
     public enum MilestoneStatus
     {
@@ -83,5 +83,29 @@ namespace Domain_Service.Enum
     {
         Leader = 1,
         Member = 2
+    }
+
+    public enum AnnouncementType
+    {
+        Urgent =1,
+        Event = 2,
+        Information=3,
+        Deadline =4
+    }
+
+    public enum AnnouncementTargetAudience
+    {
+       Everyone =1,
+       FacultiesOnly = 2,
+       StudentsOnly = 3,
+       ClerksOnly= 4
+    }
+
+    public enum NotificationType
+    {
+        Fee,
+        Exam,
+        FYP,
+        Announcement
     }
 }

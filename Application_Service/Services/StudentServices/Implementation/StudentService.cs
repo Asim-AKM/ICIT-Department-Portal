@@ -11,6 +11,7 @@ using Domain_Service.Enum;
 using Domain_Service.RepoInterfaces.EmailRepo;
 using Domain_Service.RepoInterfaces.UnitOfWork;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application_Service.Services.StudentServices.Implementation
 {
@@ -23,48 +24,83 @@ namespace Application_Service.Services.StudentServices.Implementation
             _uow = unitOfWork;
             _emailService = emailRepository;
         }
-        public async Task<ApiResponse<List<GetStudentDto>>> GetStudentListBySessionIdAsync(GetStudentBySessionRequest getStudentBySessionRequest)
+        public async Task<ApiResponse<List<GetStudentDto>>> GetStudentListBySessionIdAndDeprtIdAsync(
+      GetStudentBySessionRequest request)
         {
             try
             {
-                //  Input validation
-                if (getStudentBySessionRequest.SessionId == Guid.Empty)
-                    return ApiResponse<List<GetStudentDto>>.Fail("Invalid session identifier", ResponseType.BadRequest);
+                // 🔹 Validate SessionId
+                if (request.SessionId == Guid.Empty)
+                {
+                    return ApiResponse<List<GetStudentDto>>.Fail(
+                        "Invalid session identifier",
+                        ResponseType.BadRequest);
+                }
 
-                //  Fetch data 
-                var students = await _uow.StudentRepo.GetStudentListBySessionIdAsync(getStudentBySessionRequest.SessionId, getStudentBySessionRequest.StudentStatus);
+                // 🔹 Validate DepartmentId
+                if (request.DepartmentId == Guid.Empty)
+                {
+                    return ApiResponse<List<GetStudentDto>>.Fail(
+                        "Invalid department identifier",
+                        ResponseType.BadRequest);
+                }
 
-                //  Handle empty results gracefully
-                if (students == null || !students.Any())
+                // 🔹 Validate Department Exists
+                var department = await _uow.DepartmentRepository
+                    .GetByIdAsync(request.DepartmentId);
+
+                if (department == null)
+                {
+                    return ApiResponse<List<GetStudentDto>>.Fail(
+                        "Department not found",
+                        ResponseType.NotFound);
+                }
+
+                // 🔹 Fetch Students
+                var students = await _uow.StudentRepo
+                    .Query()
+                    .Where(s =>
+                        s.SessionId == request.SessionId &&
+                        s.DepartmentId == request.DepartmentId &&
+                        s.Status == request.StudentStatus
+                    )
+                    .ToListAsync();
+
+                // 🔹 Empty Result
+                if (!students.Any())
                 {
                     return ApiResponse<List<GetStudentDto>>.Success(
                         new List<GetStudentDto>(),
-                        "No students found for the specified session and StudentStatus",
+                        "No students found",
                         ResponseType.Ok);
                 }
 
-                //  Map to DTO
-                var studentDtos = students.MapStudentListToGetStudentDto();
+                // 🔹 Fetch Semesters
+                var semesters = await _uow.SemesterRepo.GetAllAsync();
 
+                // 🔥 Fast Lookup Dictionary
+                var semesterDict = semesters.ToDictionary(
+                    s => s.SemesterId,
+                    s => s.Name
+                );
 
+                // 🔹 Mapping
+                var studentDtos = students.MapStudentListToGetStudentDto(semesterDict);
 
-                //  Return standardized response
                 return ApiResponse<List<GetStudentDto>>.Success(
                     studentDtos,
                     "Students retrieved successfully",
                     ResponseType.Ok);
             }
-            catch (Exception)
+            catch
             {
-
-
                 return ApiResponse<List<GetStudentDto>>.Fail(
                     "An error occurred while retrieving students",
                     ResponseType.InternalServerError);
             }
         }
-       
-        public async Task<ApiResponse<string>> UploadStudentsFromExcelAsync(IFormFile file, Guid sessionId)
+
+        public async Task<ApiResponse<string>> UploadStudentsFromExcelAsync(UploadBulkStudentDto request, IFormFile file)
         {
             try
             {
@@ -72,12 +108,12 @@ namespace Application_Service.Services.StudentServices.Implementation
                     return ApiResponse<string>.Fail("File", "Invalid file uploaded", ResponseType.BadRequest);
 
                 // Get session
-                var session = await _uow.SessionRepo.FirstOrDefaultAsync(s => s.SessionId == sessionId);
+                var session = await _uow.SessionRepo.FirstOrDefaultAsync(s => s.SessionId == request.sessionId);
                 if (session == null)
                     return ApiResponse<string>.Fail("Session", "Session Not Found", ResponseType.BadRequest);
 
                 //  Get semesters
-                var semesters = await _uow.SemesterRepo.GetSemesterBySessionIdAsync(sessionId);
+                var semesters = await _uow.SemesterRepo.GetSemesterBySessionIdAsync(request.sessionId);
                 if (semesters == null || !semesters.Any())
                     return ApiResponse<string>.Fail("Semester", "No semesters found for this session", ResponseType.BadRequest);
 
@@ -87,7 +123,7 @@ namespace Application_Service.Services.StudentServices.Implementation
 
                 // Fetch all existing students for the session in a single query
                 var existingStudents = await _uow.StudentRepo
-                    .GetStudentListBySessionIdAsync(sessionId); // returns List<Student>
+                    .GetStudentListBySessionIdAsync(request.sessionId); // returns List<Student>
 
                 var existingRollNos = existingStudents.Select(s => s.RollNo).ToHashSet();
                 var existingCnics = existingStudents.Select(s => s.CNIC).ToHashSet();
@@ -150,7 +186,8 @@ namespace Application_Service.Services.StudentServices.Implementation
                             Status = StudentStatus.Unverified,
                             GPA = 0,
                             SamesterId = firstSemester.SemesterId,
-                            SessionId = sessionId
+                            SessionId = request.sessionId,
+                            DepartmentId = request.DepartmentId
                         };
 
                         studentsToInsert.Add(student);
@@ -167,113 +204,147 @@ namespace Application_Service.Services.StudentServices.Implementation
             }
         }
 
-        public async Task<ApiResponse<string>> VerifyStudentAsync(StudentVerifyRequest studentVerifyRequest)
+        public async Task<ApiResponse<string>> VerifyStudentAsync(StudentVerifyRequest request)
         {
-            var existStudent = await _uow.StudentRepo.GetByIdAsync(studentVerifyRequest.StudentId);
-            if (existStudent == null)
-            {
-                return ApiResponse<string>.Fail("Student Not Found", ResponseType.NotFound);
-            }
-            if (existStudent.Status == StudentStatus.Verified)
-            {
-                return ApiResponse<string>.Fail("Student Already Verified", ResponseType.BadRequest);
-            }
-
-            // Generate TempPassword
-            var tempPass = PasswordGenerator.Generate();
-
-            // Create User
-            var user = new User
-            {
-                UserId = existStudent.UserId,
-                CreatedAt = DateTime.Now,
-                Email = existStudent.StudentEmail,
-                FullName = existStudent.StudentName,
-                CNIC = existStudent.CNIC,
-                Status = UserStatus.Active
-            };
             try
             {
-                await _uow.ExecuteInTransactionAsync(async () =>
+                var student = await _uow.StudentRepo
+                    .GetByIdAsync(request.StudentId);
+
+                if (student == null)
                 {
-                    // Entry in UserEntity
-                    await _uow.UserRepo.CreateAsync(user);
+                    return ApiResponse<string>.Fail(
+                        "Student Not Found",
+                        ResponseType.NotFound);
+                }
 
-                    // assign credentials
-                    var cread = user.MapToCreadDomain(tempPass);
-                    await _uow.UserCreadentialRepo.CreateAsync(cread);
+                // Already in same status
+                if (student.Status == request.Status)
+                {
+                    return ApiResponse<string>.Fail(
+                        "Student already in requested status",
+                        ResponseType.BadRequest);
+                }
 
-                    // Assign Role
-                    var role = user.MapToUserRoleDomain(RoleType.Students);
-                    await _uow.UserRoleRepo.CreateAsync(role);
+                var existingUser = await _uow.UserRepo
+                    .ExistsByEmailOrCNICAsync(student.StudentEmail, student.CNIC);
 
-                    //  Update Student Status
-                    existStudent.Status = studentVerifyRequest.Status;
-                    await _uow.StudentRepo.Update(existStudent);
+                var tempPassword = PasswordGenerator.Generate();
+                var createUser = existingUser == null;
 
-                    //  Send Email 
-                    var emailSent = await _emailService.SendStudentVerificationEmail(
-                        existStudent.StudentEmail,
-                        existStudent.StudentName,
-                        existStudent.CNIC,
-                        tempPass);
-                    if (!emailSent)
+                try
+                {
+                    await _uow.ExecuteInTransactionAsync(async () =>
                     {
-                        // throw exception to rollback transaction
-                        throw new Exception("No Internet Connection");
-                    }
-                });
+                        // 1. ALWAYS update student status
+                        student.Status = request.Status;
+                        await _uow.StudentRepo.Update(student);
 
-                return ApiResponse<string>.Success("Student Verification", "Student has been Verified successfully", ResponseType.Created);
+                        // 2. Create user ONLY if not exists
+                        if (createUser)
+                        {
+                            var user = new User
+                            {
+                                UserId = student.UserId,
+                                CreatedAt = DateTime.UtcNow,
+                                Email = student.StudentEmail,
+                                FullName = student.StudentName,
+                                CNIC = student.CNIC,
+                                Status = UserStatus.Active,
+                                DepartmentId = student.DepartmentId
+                            };
+
+                            await _uow.UserRepo.CreateAsync(user);
+
+                            await _uow.UserCreadentialRepo.CreateAsync(
+                                user.MapToCreadDomain(tempPassword));
+
+                            await _uow.UserRoleRepo.CreateAsync(
+                                user.MapToUserRoleDomain(RoleType.Student));
+                        }
+
+                    }, autosaveChanges: false);
+
+                    await _uow.SaveChangesAsync();
+
+                    // 3. Email AFTER commit (safe)
+                    if (createUser)
+                    {
+                        await _emailService.SendStudentVerificationEmail(
+                            student.StudentEmail,
+                            student.StudentName,
+                            student.CNIC,
+                            tempPassword);
+                    }
+
+                    return ApiResponse<string>.Success(
+                        "Student Verification",
+                        "Student has been verified successfully",
+                        ResponseType.Created);
+                }
+                catch (Exception ex)
+                {
+                    return ApiResponse<string>.Fail(
+                        $"Failed to verify student: {ex.Message}",
+                        ResponseType.BadRequest);
+                }
             }
             catch (Exception ex)
             {
-
-                return ApiResponse<string>.Fail($"Failed to Verify this Student : {ex.Message}", ResponseType.BadRequest);
+                return ApiResponse<string>.Fail(
+                    $"An error occurred: {ex.Message}",
+                    ResponseType.InternalServerError);
             }
         }
-
         public async Task<ApiResponse<BulkVerifyResultResponse>> VerifyStudentsBulkAsync(StudentBulkVerifyRequest bulkVerifyRequest)
         {
-            var students = await _uow.StudentRepo.GetStudentsByIdsAsync(bulkVerifyRequest.StudentIds);
-
-            if (students == null || !students.Any())
-                return ApiResponse<BulkVerifyResultResponse>.Fail("No students found", ResponseType.NotFound);
-
-            var result = new BulkVerifyResultResponse
-            {
-                Total = students.Count
-            };
-
-            // Separate students
-            var alreadyVerified = students
-                .Where(s => s.Status == StudentStatus.Verified)
-                .ToList();
-
-            var studentsToProcess = students
-                .Where(s => s.Status == StudentStatus.Unverified)
-                .ToList();
-
-            result.AlreadyVerified.AddRange(alreadyVerified.Select(s => s.StudentName));
-
-            if (!studentsToProcess.Any())
-                return ApiResponse<BulkVerifyResultResponse>.Success(result, "All students already verified", ResponseType.Ok);
-
-            var usersToAdd = new List<User>();
-            var credsToAdd = new List<UserCredential>();
-            var rolesToAdd = new List<UserRole>();
-            var studentsToUpdate = new List<Student>();
-
-            var emailQueue = new List<(string email, string name, string cnic, string password)>();
-
             try
             {
+                var students = await _uow.StudentRepo
+                    .GetStudentsByIdsAsync(bulkVerifyRequest.StudentIds);
+
+                if (students == null || !students.Any())
+                {
+                    return ApiResponse<BulkVerifyResultResponse>.Fail(
+                        "No students found",
+                        ResponseType.NotFound);
+                }
+
+                var result = new BulkVerifyResultResponse
+                {
+                    Total = students.Count
+                };
+
+                var usersToAdd = new List<User>();
+                var credsToAdd = new List<UserCredential>();
+                var rolesToAdd = new List<UserRole>();
+                var studentsToUpdate = new List<Student>();
+
+                var emailQueue = new List<(string email, string name, string cnic, string password)>();
+
+                // Get existing users in ONE query
+                var existingUserIds = await _uow.UserRepo.GetExistingUserIdsAsync(
+                    students.Select(x => x.UserId).ToList());
+
                 await _uow.ExecuteInTransactionAsync(async () =>
                 {
-                    foreach (var student in studentsToProcess)
+                    foreach (var student in students)
                     {
                         try
                         {
+                            // Always update student status
+                            student.Status = bulkVerifyRequest.Status;
+                            studentsToUpdate.Add(student);
+
+                            // If user already exists
+                            // only update student status
+                            if (existingUserIds.Contains(student.UserId))
+                            {
+                                result.Success++;
+                                continue;
+                            }
+
+                            // Create new user only if not exists
                             var tempPassword = PasswordGenerator.Generate();
 
                             var user = new User
@@ -281,19 +352,25 @@ namespace Application_Service.Services.StudentServices.Implementation
                                 UserId = student.UserId,
                                 Email = student.StudentEmail,
                                 FullName = student.StudentName,
-                                CreatedAt = DateTime.UtcNow,
                                 CNIC = student.CNIC,
+                                DepartmentId = student.DepartmentId,
                                 Status = UserStatus.Active,
+                                CreatedAt = DateTime.UtcNow
                             };
 
                             usersToAdd.Add(user);
-                            credsToAdd.Add(user.MapToCreadDomain(tempPassword));
-                            rolesToAdd.Add(user.MapToUserRoleDomain(RoleType.Students));
 
-                            student.Status = bulkVerifyRequest.Status;
-                            studentsToUpdate.Add(student);
+                            credsToAdd.Add(
+                                user.MapToCreadDomain(tempPassword));
 
-                            emailQueue.Add((student.StudentEmail, student.StudentName, student.CNIC, tempPassword));
+                            rolesToAdd.Add(
+                                user.MapToUserRoleDomain(RoleType.Student));
+
+                            emailQueue.Add((
+                                student.StudentEmail,
+                                student.StudentName,
+                                student.CNIC,
+                                tempPassword));
 
                             result.Success++;
                         }
@@ -304,6 +381,7 @@ namespace Application_Service.Services.StudentServices.Implementation
                         }
                     }
 
+                    // Bulk Insert
                     if (usersToAdd.Any())
                         await _uow.UserRepo.AddRangeAsync(usersToAdd);
 
@@ -313,6 +391,7 @@ namespace Application_Service.Services.StudentServices.Implementation
                     if (rolesToAdd.Any())
                         await _uow.UserRoleRepo.AddRangeAsync(rolesToAdd);
 
+                    // Bulk Update Students
                     if (studentsToUpdate.Any())
                         await _uow.StudentRepo.UpdatedRangeAsync(studentsToUpdate);
 
@@ -320,14 +399,16 @@ namespace Application_Service.Services.StudentServices.Implementation
 
                 await _uow.SaveChangesAsync();
 
-                // Send emails after DB commit
-                foreach (var mail in emailQueue)
+                // Send emails after successful commit
+                if (emailQueue.Any())
                 {
-                    await _emailService.SendStudentVerificationEmail(
-                        mail.email,
-                        mail.name,
-                        mail.cnic,
-                        mail.password);
+                    await Task.WhenAll(
+                        emailQueue.Select(mail =>
+                            _emailService.SendStudentVerificationEmail(
+                                mail.email,
+                                mail.name,
+                                mail.cnic,
+                                mail.password)));
                 }
 
                 return ApiResponse<BulkVerifyResultResponse>.Success(

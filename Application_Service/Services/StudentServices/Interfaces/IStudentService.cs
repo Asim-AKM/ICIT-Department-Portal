@@ -8,8 +8,8 @@ namespace Application_Service.Services.StudentServices.Interfaces
 {
     public interface IStudentService
     {
-        Task<ApiResponse<string>> UploadStudentsFromExcelAsync(IFormFile file, Guid SessionId);
-        Task<ApiResponse<List<GetStudentDto>>> GetStudentListBySessionIdAsync(GetStudentBySessionRequest getStudentBySession);
+        Task<ApiResponse<string>> UploadStudentsFromExcelAsync(UploadBulkStudentDto request, IFormFile file);
+        Task<ApiResponse<List<GetStudentDto>>> GetStudentListBySessionIdAndDeprtIdAsync(GetStudentBySessionRequest getStudentBySession);
         Task<ApiResponse<string>> VerifyStudentAsync(StudentVerifyRequest studentVerifyRequest);
         Task<ApiResponse<BulkVerifyResultResponse>> VerifyStudentsBulkAsync(StudentBulkVerifyRequest bulkVerifyRequest);
 

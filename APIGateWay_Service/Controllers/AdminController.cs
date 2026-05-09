@@ -112,11 +112,12 @@ namespace APIGateway_Service.Controllers
         /// </summary>
         /// <param name="getStudentBySession">Session ID and student status filter.</param>
         /// <returns>List of students for the specified session.</returns>
-        [HttpGet("students-by-session")]
+        [Authorize(Roles ="Admin")]
+        [HttpGet("students-by-session-and-deprt")]
         [ProducesResponseType(typeof(ApiResponse<List<GetStudentDto>>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetStudentsBySessionAsync([FromQuery] GetStudentBySessionRequest getStudentBySession)
         {
-            var response = await _studentService.GetStudentListBySessionIdAsync(getStudentBySession);
+            var response = await _studentService.GetStudentListBySessionIdAndDeprtIdAsync(getStudentBySession);
             return StatusCode((int)response.Status, response);
         }
 
@@ -140,6 +141,7 @@ namespace APIGateway_Service.Controllers
         /// </summary>
         /// <param name="bulkVerifyRequest">Bulk verification request containing student IDs and status.</param>
         /// <returns>Bulk verification result.</returns>
+        [Authorize(Roles ="Admin")]
         [HttpPut("Student-Bulk-Verify")]
         public async Task<IActionResult> BulkStudentsVerify([FromBody] StudentBulkVerifyRequest bulkVerifyRequest)
         {

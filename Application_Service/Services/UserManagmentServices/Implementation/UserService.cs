@@ -3,6 +3,7 @@ using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.RequestAndResponseModel.AuthenticationModels;
 using Application_Service.RequestAndResponseModel.Pagination;
 using Application_Service.Services.UserManagmentServices.Interfaces;
+using Domain_Service.Entities.Identity;
 using Domain_Service.Enum;
 using Domain_Service.RepoInterfaces.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
@@ -137,6 +138,107 @@ namespace Application_Service.Services.UserManagmentServices.Implementation
             {
                 return ApiResponse<PaginationResponse<GetUserDto>>.Fail(
                     "Failed to retrieve users",
+                    ResponseType.InternalServerError);
+            }
+        }
+        public async Task<ApiResponse<string>> UpdateUser(UpdateUserDto request)
+        {
+            try
+            {
+                // 🔹 1. Check user exists
+                var user = await _uow.UserRepo.FirstOrDefaultAsync(
+                    u => u.UserId == request.UserId
+                );
+
+                if (user == null)
+                {
+                    return ApiResponse<string>.Fail(
+                        "User not found",
+                        ResponseType.NotFound);
+                }
+
+                // 🔹 2. Duplicate validation
+                var duplicateUser = await _uow.UserRepo.FirstOrDefaultAsync(u =>
+                    (u.Email == request.Email ||
+                     u.UserName == request.UserName ||
+                     u.CNIC == request.CNIC)
+                    && u.UserId != request.UserId
+                );
+
+                if (duplicateUser != null)
+                {
+                    var errors = new List<string>();
+
+                    if (duplicateUser.Email == request.Email)
+                        errors.Add("Email already registered");
+
+                    if (duplicateUser.UserName == request.UserName)
+                        errors.Add("Username already taken");
+
+                    if (duplicateUser.CNIC == request.CNIC)
+                        errors.Add("CNIC already exists");
+
+                    return ApiResponse<string>.Fail(
+                        string.Join(" | ", errors),
+                        ResponseType.Conflict);
+                }
+
+                // 🔹 3. Validate Department
+                if (request.DepartmentId.HasValue)
+                {
+                    var department = await _uow.DepartmentRepository
+                        .GetByIdAsync(request.DepartmentId.Value);
+
+                    if (department == null)
+                    {
+                        return ApiResponse<string>.Fail(
+                            "Invalid department",
+                            ResponseType.BadRequest);
+                    }
+                }
+
+                // 🔥 4. Transaction Start
+                await _uow.ExecuteInTransactionAsync(async () =>
+                {
+                    // 🔹 Update User
+                    user.FullName = request.FullName;
+                    user.UserName = request.UserName;
+                    user.Email = request.Email;
+                    user.Contact = request.Contact;
+                    user.CNIC = request.CNIC;
+                    user.DepartmentId = request.DepartmentId;
+                    user.Status = request.Status;
+
+                    await _uow.UserRepo.Update(user);
+
+                    // 🔹 Update Role
+                    var userRole = await _uow.UserRoleRepo.FirstOrDefaultAsync(
+                        ur => ur.UserId == request.UserId
+                    );
+
+                    if (userRole != null)
+                    {
+                        userRole.RoleName = request.Role;
+                        await _uow.UserRoleRepo.Update(userRole);
+                    }
+                    else
+                    {
+                        await _uow.UserRoleRepo.CreateAsync(new UserRole
+                        {
+                            UserId = user.UserId,
+                            RoleName = request.Role
+                        });
+                    }
+                });
+
+                return ApiResponse<string>.Success("UpdateUser",
+                    "User updated successfully",
+                    ResponseType.Ok);
+            }
+            catch
+            {
+                return ApiResponse<string>.Fail(
+                    "Failed to update user",
                     ResponseType.InternalServerError);
             }
         }

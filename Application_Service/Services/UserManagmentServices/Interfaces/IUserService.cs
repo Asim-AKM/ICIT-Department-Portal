@@ -10,5 +10,6 @@ namespace Application_Service.Services.UserManagmentServices.Interfaces
     {
         Task<ApiResponse<PaginationResponse<GetUserDto>>> GetAllUsers(int pageNumber = 1, int pageSize = 10);
         Task<ApiResponse<PaginationResponse<GetUserDto>>> GetUsersByFilter(GetUserByRoleAndStatusRequest request);
+        Task<ApiResponse<string>> UpdateUser(UpdateUserDto request);
     }
 }

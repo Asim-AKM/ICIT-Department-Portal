@@ -41,16 +41,18 @@ namespace APIGateway_Service.Controllers
         /// <remarks>This method handles the upload of student data in bulk and may return various HTTP
         /// status codes based on the result of the operation.</remarks>
         /// <param name="file">The file containing the bulk student data to be uploaded. This parameter must not be null and should be in a
-        /// supported format.</param>
+        /// supported Excel format.</param>
         /// <param name="request">The session details required to process the upload. This parameter must not be null and should contain valid
         /// session information.</param>
         /// <param name="SessionId">Session Id Required</param>
         /// <returns>An IActionResult that indicates the outcome of the upload operation. The result may represent success,
         /// validation errors, conflicts, or server errors.</returns>
         [HttpPost("Upload-Student-BulkData")]
-        public async Task<IActionResult> UploadStudentBulkData(IFormFile file, [FromQuery] Guid SessionId)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadStudentBulkData(IFormFile file ,[FromForm] UploadBulkStudentDto request)
         {
-            var response = await _studentService.UploadStudentsFromExcelAsync(file, SessionId);
+            var response = await _studentService.UploadStudentsFromExcelAsync(request, file);
+
             return StatusCode((int)response.Status, response);
         }
 

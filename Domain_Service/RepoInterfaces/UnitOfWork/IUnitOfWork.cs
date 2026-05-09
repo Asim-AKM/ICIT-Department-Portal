@@ -1,5 +1,9 @@
 ﻿using Domain_Service.RepoInterfaces.AdminRepo;
+using Domain_Service.RepoInterfaces.AnnouncemenRepo;
+using Domain_Service.RepoInterfaces.ClerkRepo;
 using Domain_Service.RepoInterfaces.DeptRepo;
+using Domain_Service.RepoInterfaces.FacultyRepo;
+using Domain_Service.RepoInterfaces.NotificationRepo;
 using Domain_Service.RepoInterfaces.StudentManagments;
 using Domain_Service.RepoInterfaces.UserManagment;
 
@@ -14,6 +18,10 @@ namespace Domain_Service.RepoInterfaces.UnitOfWork
         ISessionRepo SessionRepo { get; }
         ISemesterRepo SemesterRepo { get; }
         IDepartmentRepository DepartmentRepository { get; }
+        IAnnouncmentRepo AnnouncmentRepo { get; }
+        INotificationRepo NotificationRepo { get; }
+        IFacultyRepo FucaltyRepo { get; }
+        IClerkRepo ClerkRepo { get; }
 
         /// <summary>
         /// Commits all changes to the database within an optional transaction

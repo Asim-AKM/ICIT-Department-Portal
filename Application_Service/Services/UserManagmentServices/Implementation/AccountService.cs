@@ -2,6 +2,7 @@
 using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.Mapper_s.UserManagmentMappers;
 using Application_Service.Services.UserManagmentServices.Interfaces;
+using Domain_Service.Entities.Academic;
 using Domain_Service.Entities.Identity;
 using Domain_Service.Enum;
 using Domain_Service.RepoInterfaces.EmailRepo;
@@ -21,94 +22,6 @@ namespace Application_Service.Services.UserManagmentServices.Implementation
             _uow = uow;
             _emailService = emailService;
             Console.WriteLine($"UOW HashCode: {_uow.GetHashCode()}");
-        }
-        public async Task<ApiResponse<CreateUserResponseDto>> CreateAccount(CreateUserDto request, RoleType role)
-        {
-            try
-            {
-               
-                var existingUser = await _uow.UserRepo.FirstOrDefaultAsync(u =>
-                    u.Email == request.Email ||
-                    u.UserName == request.UserName ||
-                    u.CNIC == request.CNIC);
-
-                if (existingUser != null)
-                {
-                    var errors = new List<string>();
-
-                    if (existingUser.Email == request.Email)
-                        errors.Add("Email already registered");
-
-                    if (existingUser.UserName == request.UserName)
-                        errors.Add("Username already registered");
-
-                    if (existingUser.CNIC == request.CNIC)
-                        errors.Add("CNIC already registered");
-
-                    return ApiResponse<CreateUserResponseDto>.Fail(
-                        string.Join(" | ", errors),
-                        ResponseType.Conflict);
-                }
-
-                // 🔹 Handle temp password (record → use `with`)
-                if (request.GeneratTempPassword)
-                {
-                    request = request with
-                    {
-                        Password = PasswordGenerator.GenerateRandomPassword()
-                    };
-                }
-                var user = request.MapToDomain();
-
-                // 🔹 Create user inside transaction
-                await _uow.ExecuteInTransactionAsync(async () =>
-                {
-                 
-                    await _uow.UserRepo.CreateAsync(user);
-
-                    var credential = user.MapToCreadDomain(request.Password);
-                    await _uow.UserCreadentialRepo.CreateAsync(credential);
-
-                    var userRole = user.MapToUserRoleDomain(role);
-                    await _uow.UserRoleRepo.CreateAsync(userRole);
-                });
-
-                // 🔹 Send email AFTER successful commit
-                if (request.SendWelcomeEmail)
-                {
-                    var emailSent = await _emailService.SendAccountCreatWelcomeEmail(
-                        request.Email,
-                        request.FullName,
-                        request.UserName,
-                        request.Password,
-                        role.ToString()
-                    );
-
-                    if (!emailSent)
-                    {
-                       
-
-                        return ApiResponse<CreateUserResponseDto>.Success(
-                            user.MapToResponse(),
-                            "Email Sending Failed But User created successfully",
-                            ResponseType.Created);
-                    }
-                }
-
-                return ApiResponse<CreateUserResponseDto>.Success(
-                    user.MapToResponse(),
-                    "User created successfully",
-                    ResponseType.Created);
-            }
-            catch (Exception ex)
-            {
-                // 🔹 Log internally, don’t expose raw exception
-                // _logger.LogError(ex, "Error creating user");
-
-                return ApiResponse<CreateUserResponseDto>.Fail(
-                    "Failed to create user",
-                    ResponseType.InternalServerError);
-            }
         }
 
         public async Task<ApiResponse<GetUserProfileDto>> GetProfileDetails(Guid userId)
@@ -314,6 +227,133 @@ namespace Application_Service.Services.UserManagmentServices.Implementation
             }
         }
 
+        public async Task<ApiResponse<CreateUserResponseDto>> CreateAccount(CreateUserDto request, RoleType role)
+        {
+            try
+            {
+                var existingUser = await _uow.UserRepo.FirstOrDefaultAsync(u =>
+                    u.Email == request.Email ||
+                    u.UserName == request.UserName ||
+                    u.CNIC == request.CNIC);
+
+                if (existingUser != null)
+                {
+                    var errors = new List<string>();
+                    if (existingUser.Email == request.Email) errors.Add("Email already registered");
+                    if (existingUser.UserName == request.UserName) errors.Add("Username already registered");
+                    if (existingUser.CNIC == request.CNIC) errors.Add("CNIC already registered");
+                    return ApiResponse<CreateUserResponseDto>.Fail(string.Join(" | ", errors), ResponseType.Conflict);
+                }
+
+                if (request.GeneratTempPassword)
+                {
+                    request = request with { Password = PasswordGenerator.GenerateRandomPassword() };
+                }
+
+                var user = request.MapToDomain();
+
+                await _uow.ExecuteInTransactionAsync(async () =>
+                {
+                    // 1. User create
+                    await _uow.UserRepo.CreateAsync(user);
+
+                    // 2. Credential create
+                    var credential = user.MapToCreadDomain(request.Password);
+                    await _uow.UserCreadentialRepo.CreateAsync(credential);
+
+                    // 3. UserRole create
+                    var userRole = user.MapToUserRoleDomain(role);
+                    await _uow.UserRoleRepo.CreateAsync(userRole);
+
+                    // 4. 🔴 SPECIFIC TABLE ENTRY - Separate method call
+                    await CreateSpecificRoleEntry(user.UserId, request, role);
+                });
+
+                // Email send karna (transaction ke bahar)
+                if (request.SendWelcomeEmail)
+                {
+                    var emailSent = await _emailService.SendAccountCreatWelcomeEmail(
+                        request.Email, request.FullName, request.UserName,
+                        request.Password, role.ToString()
+                    );
+                    if (!emailSent)
+                    {
+                        return ApiResponse<CreateUserResponseDto>.Success(
+                            user.MapToResponse(),
+                            "Email Sending Failed But User created successfully",
+                            ResponseType.Created);
+                    }
+                }
+
+                return ApiResponse<CreateUserResponseDto>.Success(
+                    user.MapToResponse(),
+                    "User created successfully",
+                    ResponseType.Created);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<CreateUserResponseDto>.Fail(
+                    "Failed to create user",
+                    ResponseType.InternalServerError);
+            }
+        }
+
+        //  PRIVATE METHOD - Isme saara role-specific logic hoga
+        private async Task CreateSpecificRoleEntry(Guid userId, CreateUserDto request, RoleType role)
+        {
+            switch (role)
+            {
+                case RoleType.Student:
+                    var student = new Student
+                    {
+                        StudentId = Guid.NewGuid(),
+                        UserId = userId,
+                        DepartmentId = request.DepartmentId ?? Guid.Empty,
+                        StudentName = request.FullName,
+                        StudentEmail = request.Email,
+                        RollNo = "", // Separate method bana sakte ho
+                        RegistrationNo = "", // Separate method
+                        CNIC = request.CNIC,
+                        GPA = 0,
+                        SamesterId = Guid.Empty, // Aapki business logic
+                        SessionId =Guid.Empty ,   // Aapki business logic
+                        Status = StudentStatus.Unverified
+                    };
+                    await _uow.StudentRepo.CreateAsync(student);
+                    break;
+
+                case RoleType.Clerk:
+                    var clerk = new Clerk
+                    {
+                        ClerkId = Guid.NewGuid(),
+                        UserId = userId,
+                        DepartmentId = request.DepartmentId ?? Guid.Empty,
+                        Designation = "Clerk",
+                        JoiningDate = DateTime.UtcNow
+                    };
+                    await _uow.ClerkRepo.CreateAsync(clerk);
+                    break;
+
+                case RoleType.Faculty:
+                    var faculty = new Faculty
+                    {
+                        FacultyId = Guid.NewGuid(),
+                        UserId = userId,
+                        DepartmentId = request.DepartmentId ?? Guid.Empty,
+                        Designation = "Faculty Member",
+                        JoiningDate = DateTime.UtcNow
+                    };
+                    await _uow.FucaltyRepo.CreateAsync(faculty);
+                    break;
+
+                case RoleType.Admin:
+                    // Admin ke liye kuch nahi karna
+                    break;
+
+                default:
+                    throw new ArgumentException($"Unsupported role type: {role}");
+            }
+        }
 
         private async Task<string> SaveOrUpdateImageAsync(IFormFile file, string? oldImageUrl = null)
         {
