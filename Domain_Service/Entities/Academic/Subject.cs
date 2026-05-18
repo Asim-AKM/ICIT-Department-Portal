@@ -11,8 +11,16 @@ namespace Domain_Service.Entities.Academic
     {
         [Key]
         public  Guid SubjectId { get; set; }
-        public  String Title { get; set; }=String.Empty;
+        public  string Title { get; set; }=String.Empty;
+        public Guid DepartmentId { get; set; }
         public  Guid SemesterId{ get; set; }
-        public  Guid FacultyId{ get; set; }
+        public  Guid? FacultyId{ get; set; }
+        public int CreditHours { get; set; }
+        public bool IsActive { get; set; } = true;
+
+        public Semester Semester { get; set; } // Navigational Property
+        public Department Department { get; set; } // Navigational Property
+
+        public Faculty Faculty { get; set; } // Navigational Property
     }
 }

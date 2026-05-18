@@ -16,5 +16,8 @@ namespace Domain_Service.Entities.Academic
         public Guid SubjectId { get; set; }
         public Guid SemesterId { get; set; }
         public EnrollmentStatus Status { get; set; }
+        public Subject Subject { get; set; } // Navigational Property
+        public Student Student { get; set; } // Navigational Property
+        public Semester Semester { get; set; } // Navigational Property
     }
 }

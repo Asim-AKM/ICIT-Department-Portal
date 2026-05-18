@@ -13,6 +13,7 @@ namespace Domain_Service.RepoInterfaces.StudentManagments
 
         //Task<List<Student>> GetStudentsByIdsAsync(List<Guid> ids, Expression<Func<Student, Guid>> keySelector);
         Task<List<Student>> GetStudentsByIdsAsync(List<Guid> ids);
+        Task<Student> GetStudentByUserId(Guid userId);
 
 
     }

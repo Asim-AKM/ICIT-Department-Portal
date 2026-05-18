@@ -1,6 +1,7 @@
 ﻿using Application_Service.DTO_s.StudentDTO_s;
 using Application_Service.DTO_s.UserManagmentDTO_s;
 using Application_Service.Services.AdminServices.Interfaces;
+using Application_Service.Services.SemesterServices.Interfaces;
 using Application_Service.Services.StudentServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,12 +28,12 @@ namespace APIGateway_Service.Controllers
         /// </summary>
         /// <param name="sessionService"></param>
         /// <param name="studentService"></param>
-        public ClerkController(ISessionService sessionService, IStudentService studentService)
+        /// <param name="promotionService"></param>
+        public ClerkController(ISessionService sessionService, IStudentService studentService, IPromotionService promotionService)
         {
             // Constructor logic can be added here if needed
             _sessionService = sessionService;
                 _studentService = studentService;
-
         }
 
         /// <summary>
@@ -55,6 +56,8 @@ namespace APIGateway_Service.Controllers
 
             return StatusCode((int)response.Status, response);
         }
+
+
 
     }
 }

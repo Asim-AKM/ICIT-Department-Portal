@@ -24,8 +24,7 @@ namespace Application_Service.Services.StudentServices.Implementation
             _uow = unitOfWork;
             _emailService = emailRepository;
         }
-        public async Task<ApiResponse<List<GetStudentDto>>> GetStudentListBySessionIdAndDeprtIdAsync(
-      GetStudentBySessionRequest request)
+        public async Task<ApiResponse<List<GetStudentDto>>> GetStudentListBySessionIdAndDeprtIdAsync(GetStudentBySessionRequest request)
         {
             try
             {
@@ -184,7 +183,6 @@ namespace Application_Service.Services.StudentServices.Implementation
                             RegistrationNo = regNo,
                             CNIC = cnic,
                             Status = StudentStatus.Unverified,
-                            GPA = 0,
                             SamesterId = firstSemester.SemesterId,
                             SessionId = request.sessionId,
                             DepartmentId = request.DepartmentId
@@ -296,6 +294,137 @@ namespace Application_Service.Services.StudentServices.Implementation
                     ResponseType.InternalServerError);
             }
         }
+
+        #region BulkVerification Without Auto Enrollment
+        //public async Task<ApiResponse<BulkVerifyResultResponse>> VerifyStudentsBulkAsync(StudentBulkVerifyRequest bulkVerifyRequest)
+        //{
+        //    try
+        //    {
+        //        var students = await _uow.StudentRepo
+        //            .GetStudentsByIdsAsync(bulkVerifyRequest.StudentIds);
+
+        //        if (students == null || !students.Any())
+        //        {
+        //            return ApiResponse<BulkVerifyResultResponse>.Fail(
+        //                "No students found",
+        //                ResponseType.NotFound);
+        //        }
+
+        //        var result = new BulkVerifyResultResponse
+        //        {
+        //            Total = students.Count
+        //        };
+
+        //        var usersToAdd = new List<User>();
+        //        var credsToAdd = new List<UserCredential>();
+        //        var rolesToAdd = new List<UserRole>();
+        //        var studentsToUpdate = new List<Student>();
+
+        //        var emailQueue = new List<(string email, string name, string cnic, string password)>();
+
+        //        // Get existing users in ONE query
+        //        var existingUserIds = await _uow.UserRepo.GetExistingUserIdsAsync(
+        //            students.Select(x => x.UserId).ToList());
+
+        //        await _uow.ExecuteInTransactionAsync(async () =>
+        //        {
+        //            foreach (var student in students)
+        //            {
+        //                try
+        //                {
+        //                    // Always update student status
+        //                    student.Status = bulkVerifyRequest.Status;
+        //                    studentsToUpdate.Add(student);
+
+        //                    // If user already exists
+        //                    // only update student status
+        //                    if (existingUserIds.Contains(student.UserId))
+        //                    {
+        //                        result.Success++;
+        //                        continue;
+        //                    }
+
+        //                    // Create new user only if not exists
+        //                    var tempPassword = PasswordGenerator.Generate();
+
+        //                    var user = new User
+        //                    {
+        //                        UserId = student.UserId,
+        //                        Email = student.StudentEmail,
+        //                        FullName = student.StudentName,
+        //                        CNIC = student.CNIC,
+        //                        DepartmentId = student.DepartmentId,
+        //                        Status = UserStatus.Active,
+        //                        CreatedAt = DateTime.UtcNow
+        //                    };
+
+        //                    usersToAdd.Add(user);
+
+        //                    credsToAdd.Add(
+        //                        user.MapToCreadDomain(tempPassword));
+
+        //                    rolesToAdd.Add(
+        //                        user.MapToUserRoleDomain(RoleType.Student));
+
+        //                    emailQueue.Add((
+        //                        student.StudentEmail,
+        //                        student.StudentName,
+        //                        student.CNIC,
+        //                        tempPassword));
+
+        //                    result.Success++;
+        //                }
+        //                catch
+        //                {
+        //                    result.Failed++;
+        //                    result.FailedStudents.Add(student.StudentName);
+        //                }
+        //            }
+
+        //            // Bulk Insert
+        //            if (usersToAdd.Any())
+        //                await _uow.UserRepo.AddRangeAsync(usersToAdd);
+
+        //            if (credsToAdd.Any())
+        //                await _uow.UserCreadentialRepo.AddRangeAsync(credsToAdd);
+
+        //            if (rolesToAdd.Any())
+        //                await _uow.UserRoleRepo.AddRangeAsync(rolesToAdd);
+
+        //            // Bulk Update Students
+        //            if (studentsToUpdate.Any())
+        //                await _uow.StudentRepo.UpdatedRangeAsync(studentsToUpdate);
+
+        //        }, autosaveChanges: false);
+
+        //        await _uow.SaveChangesAsync();
+
+        //        // Send emails after successful commit
+        //        if (emailQueue.Any())
+        //        {
+        //            await Task.WhenAll(
+        //                emailQueue.Select(mail =>
+        //                    _emailService.SendStudentVerificationEmail(
+        //                        mail.email,
+        //                        mail.name,
+        //                        mail.cnic,
+        //                        mail.password)));
+        //        }
+
+        //        return ApiResponse<BulkVerifyResultResponse>.Success(
+        //            result,
+        //            "Student bulk verification completed successfully",
+        //            ResponseType.Ok);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return ApiResponse<BulkVerifyResultResponse>.Fail(
+        //            $"Bulk verification failed: {ex.Message}",
+        //            ResponseType.BadRequest);
+        //    }
+        //}
+        #endregion
+
         public async Task<ApiResponse<BulkVerifyResultResponse>> VerifyStudentsBulkAsync(StudentBulkVerifyRequest bulkVerifyRequest)
         {
             try
@@ -322,7 +451,6 @@ namespace Application_Service.Services.StudentServices.Implementation
 
                 var emailQueue = new List<(string email, string name, string cnic, string password)>();
 
-                // Get existing users in ONE query
                 var existingUserIds = await _uow.UserRepo.GetExistingUserIdsAsync(
                     students.Select(x => x.UserId).ToList());
 
@@ -332,45 +460,68 @@ namespace Application_Service.Services.StudentServices.Implementation
                     {
                         try
                         {
-                            // Always update student status
+                            // 🔹 Update Student Status
                             student.Status = bulkVerifyRequest.Status;
                             studentsToUpdate.Add(student);
 
-                            // If user already exists
-                            // only update student status
-                            if (existingUserIds.Contains(student.UserId))
+                            // 🔹 Create User if not exists
+                            if (!existingUserIds.Contains(student.UserId))
                             {
-                                result.Success++;
-                                continue;
+                                var tempPassword = PasswordGenerator.Generate();
+
+                                var user = new User
+                                {
+                                    UserId = student.UserId,
+                                    Email = student.StudentEmail,
+                                    FullName = student.StudentName,
+                                    CNIC = student.CNIC,
+                                    DepartmentId = student.DepartmentId,
+                                    Status = UserStatus.Active,
+                                    CreatedAt = DateTime.UtcNow
+                                };
+
+                                usersToAdd.Add(user);
+                                credsToAdd.Add(user.MapToCreadDomain(tempPassword));
+                                rolesToAdd.Add(user.MapToUserRoleDomain(RoleType.Student));
+
+                                emailQueue.Add((
+                                    student.StudentEmail,
+                                    student.StudentName,
+                                    student.CNIC,
+                                    tempPassword));
                             }
 
-                            // Create new user only if not exists
-                            var tempPassword = PasswordGenerator.Generate();
-
-                            var user = new User
+                            // 🔥 AUTO ENROLLMENT (ONLY WHEN VERIFIED)
+                            if (bulkVerifyRequest.Status == StudentStatus.Verified)
                             {
-                                UserId = student.UserId,
-                                Email = student.StudentEmail,
-                                FullName = student.StudentName,
-                                CNIC = student.CNIC,
-                                DepartmentId = student.DepartmentId,
-                                Status = UserStatus.Active,
-                                CreatedAt = DateTime.UtcNow
-                            };
+                                bool exists = await EnrollmentExists(student.StudentId, student.SamesterId);
 
-                            usersToAdd.Add(user);
+                                if (exists)
+                                {
+                                    result.skiped++;
+                                    continue;
+                                }
 
-                            credsToAdd.Add(
-                                user.MapToCreadDomain(tempPassword));
+                                var subjects = await _uow.SubjectRepository.Query()
+                                    .Where(s =>
+                                        s.DepartmentId == student.DepartmentId &&
+                                        s.SemesterId == student.SamesterId)
+                                    .ToListAsync();
 
-                            rolesToAdd.Add(
-                                user.MapToUserRoleDomain(RoleType.Student));
+                                var enrollments = subjects.Select(subject => new Enrollment
+                                {
+                                    EnrollmentId = Guid.NewGuid(),
+                                    StudentId = student.StudentId,
+                                    SubjectId = subject.SubjectId,
+                                    SemesterId = student.SamesterId,
+                                    Status = EnrollmentStatus.Enrolled
+                                }).ToList();
 
-                            emailQueue.Add((
-                                student.StudentEmail,
-                                student.StudentName,
-                                student.CNIC,
-                                tempPassword));
+                                if (enrollments.Any())
+                                {
+                                    await _uow.EnrollmentRepo.AddRangeAsync(enrollments);
+                                }
+                            }
 
                             result.Success++;
                         }
@@ -381,7 +532,7 @@ namespace Application_Service.Services.StudentServices.Implementation
                         }
                     }
 
-                    // Bulk Insert
+                    // 🔹 Bulk DB operations
                     if (usersToAdd.Any())
                         await _uow.UserRepo.AddRangeAsync(usersToAdd);
 
@@ -391,7 +542,6 @@ namespace Application_Service.Services.StudentServices.Implementation
                     if (rolesToAdd.Any())
                         await _uow.UserRoleRepo.AddRangeAsync(rolesToAdd);
 
-                    // Bulk Update Students
                     if (studentsToUpdate.Any())
                         await _uow.StudentRepo.UpdatedRangeAsync(studentsToUpdate);
 
@@ -399,7 +549,7 @@ namespace Application_Service.Services.StudentServices.Implementation
 
                 await _uow.SaveChangesAsync();
 
-                // Send emails after successful commit
+
                 if (emailQueue.Any())
                 {
                     await Task.WhenAll(
@@ -422,6 +572,13 @@ namespace Application_Service.Services.StudentServices.Implementation
                     $"Bulk verification failed: {ex.Message}",
                     ResponseType.BadRequest);
             }
+        }
+        private async Task<bool> EnrollmentExists(Guid studentId, Guid semesterId)
+        {
+            return await _uow.EnrollmentRepo.Query()
+                .AnyAsync(e =>
+                    e.StudentId == studentId &&
+                    e.SemesterId == semesterId);
         }
 
     }

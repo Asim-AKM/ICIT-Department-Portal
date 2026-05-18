@@ -314,7 +314,6 @@ namespace Application_Service.Services.UserManagmentServices.Implementation
                         RollNo = "", // Separate method bana sakte ho
                         RegistrationNo = "", // Separate method
                         CNIC = request.CNIC,
-                        GPA = 0,
                         SamesterId = Guid.Empty, // Aapki business logic
                         SessionId =Guid.Empty ,   // Aapki business logic
                         Status = StudentStatus.Unverified

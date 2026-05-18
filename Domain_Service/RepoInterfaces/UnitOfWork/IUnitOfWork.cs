@@ -2,9 +2,13 @@
 using Domain_Service.RepoInterfaces.AnnouncemenRepo;
 using Domain_Service.RepoInterfaces.ClerkRepo;
 using Domain_Service.RepoInterfaces.DeptRepo;
+using Domain_Service.RepoInterfaces.EnrollmentRepo;
 using Domain_Service.RepoInterfaces.FacultyRepo;
+using Domain_Service.RepoInterfaces.GradeRepositories;
 using Domain_Service.RepoInterfaces.NotificationRepo;
+using Domain_Service.RepoInterfaces.ResultLockedRepo;
 using Domain_Service.RepoInterfaces.StudentManagments;
+using Domain_Service.RepoInterfaces.SubjectRepo_s;
 using Domain_Service.RepoInterfaces.UserManagment;
 
 namespace Domain_Service.RepoInterfaces.UnitOfWork
@@ -22,6 +26,10 @@ namespace Domain_Service.RepoInterfaces.UnitOfWork
         INotificationRepo NotificationRepo { get; }
         IFacultyRepo FucaltyRepo { get; }
         IClerkRepo ClerkRepo { get; }
+        ISubjectRepository SubjectRepository { get; }
+        IEnrollmentRepo EnrollmentRepo { get; }
+        IGradeRepo GradeRepo { get; }
+        IResultLockRepo ResultLockRepo { get; }
 
         /// <summary>
         /// Commits all changes to the database within an optional transaction

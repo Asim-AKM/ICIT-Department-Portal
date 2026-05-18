@@ -15,7 +15,6 @@ namespace Domain_Service.Entities.Academic
         public string RollNo { get; set; } = string.Empty;
         public string RegistrationNo { get; set; } = string.Empty;
         public string CNIC {  get; set; } = string.Empty;
-        public float GPA { get; set; } = float.MinValue;
         public Guid SamesterId { get; set; }
         public Guid SessionId { get; set; }
         public StudentStatus Status { get; set; }

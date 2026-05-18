@@ -28,6 +28,7 @@ namespace Infrastructure_Service.Data
         public DbSet<Session> Sessions { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Subject> Subjects { get; set; }
+        public DbSet<ResultLock> ResultLocks { get; set; }
 
         // Feedback related DbSets
         public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
@@ -49,15 +50,69 @@ namespace Infrastructure_Service.Data
         public DbSet<Announcement> Announcements { get; set; }
         public DbSet<BulkEnrollmentBatch> BulkEnrollmentBatches { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+       
 
 
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // ✅ Seed Departments
+            base.OnModelCreating(modelBuilder);
+
+            // =========================
+            // SEED DATA
+            // =========================
             var departments = DepartmentSeed.GetDepartments();
             modelBuilder.Entity<Department>().HasData(departments);
+
+            // =========================
+            // SUBJECT RELATIONSHIPS
+            // =========================
+
+            modelBuilder.Entity<Subject>()
+                .HasOne(s => s.Department)
+                .WithMany()
+                .HasForeignKey(s => s.DepartmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            
+            modelBuilder.Entity<Subject>()
+                .HasOne(s => s.Semester)
+                .WithMany()
+                .HasForeignKey(s => s.SemesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // =========================
+            // ENROLLMENT RELATIONSHIPS
+            // =========================
+
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.Student)
+                .WithMany()
+                .HasForeignKey(e => e.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.Subject)
+                .WithMany()
+                .HasForeignKey(e => e.SubjectId)
+                .OnDelete(DeleteBehavior.Restrict); // important to avoid cascade loop
+
+            modelBuilder.Entity<Enrollment>()
+                .HasOne(e => e.Semester)
+                .WithMany()
+                .HasForeignKey(e => e.SemesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // =========================
+            // GRADE RELATIONSHIPS
+            // =========================
+
+            modelBuilder.Entity<Grade>()
+                .HasOne(g => g.Enrollment)
+                .WithMany()
+                .HasForeignKey(g => g.EnrollmentId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }

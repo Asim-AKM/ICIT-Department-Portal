@@ -1,4 +1,5 @@
 ﻿using Domain_Service.Entities.FYP;
+using Domain_Service.Entities.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Domain_Service.Entities.Academic
@@ -14,5 +15,6 @@ namespace Domain_Service.Entities.Academic
         public DateTime JoiningDate { get; set; }
         public List<Subject> SubjectsTaught { get; set; } = new List<Subject>();
         public List<FYPProposal> SupervisedProjects { get; set; } = new List<FYPProposal>();
+        public User User { get; set; } // Navigation Prop
     }
 }

@@ -4,7 +4,6 @@ using Domain_Service.RepoInterfaces.StudentManagments;
 using Infrastructure_Service.Data;
 using Infrastructure_Service.Persistance.GenericRepository;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Infrastructure_Service.Persistance.Repositories.StudentRepo_s
 {
@@ -14,6 +13,12 @@ namespace Infrastructure_Service.Persistance.Repositories.StudentRepo_s
         public StudentRepo(ApplicationDbContext context) : base(context)
         {
             _context = context;
+        }
+
+        public async Task<Student> GetStudentByUserId(Guid userId)
+        {
+            var student  =  await _context.Students.AsNoTracking().FirstOrDefaultAsync(x=> x.UserId == userId);
+            return student!;
         }
 
         public async Task<List<Student>> GetStudentListBySessionIdAsync(Guid SessionId, StudentStatus studentStatus)

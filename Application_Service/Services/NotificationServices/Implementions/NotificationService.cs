@@ -17,9 +17,6 @@ namespace Application_Service.Services.NotificationServices.Implementions
             _uow = uow;
         }
 
-        // ===============================================
-        // GetMyNotificationsAsync
-        // ===============================================
         public async Task<ApiResponse<List<NotificationDto>>> GetMyNotificationsAsync(Guid userId)
         {
             try

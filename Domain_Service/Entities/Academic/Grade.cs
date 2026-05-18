@@ -19,5 +19,7 @@ namespace Domain_Service.Entities.Academic
         public int AssignmentMarks { get; set; }
         public int QuizMarks { get; set; }
         public int TotalMarks { get; set; }
+
+        public Enrollment Enrollment { get; set; } // Navigational Property
     }
 }

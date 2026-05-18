@@ -8,10 +8,18 @@ using Application_Service.Services.AnnouncementServices.Implementation;
 using Application_Service.Services.AnnouncementServices.Interfaces;
 using Application_Service.Services.DeptServices.Implementation;
 using Application_Service.Services.DeptServices.Interfaces;
+using Application_Service.Services.FacultyServices.Implementations;
+using Application_Service.Services.FacultyServices.Interfaces;
+using Application_Service.Services.GradeServices.Implementations;
+using Application_Service.Services.GradeServices.Interfaces;
 using Application_Service.Services.NotificationServices.Implementions;
 using Application_Service.Services.NotificationServices.Interfaces;
+using Application_Service.Services.SemesterServices.Implementions;
+using Application_Service.Services.SemesterServices.Interfaces;
 using Application_Service.Services.StudentServices.Implementation;
 using Application_Service.Services.StudentServices.Interfaces;
+using Application_Service.Services.SubjectServices.Implementation;
+using Application_Service.Services.SubjectServices.Interfaces;
 using Application_Service.Services.UserManagmentServices.Implementation;
 using Application_Service.Services.UserManagmentServices.Interfaces;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +42,15 @@ namespace Application_Service.DI
             .AddScoped<IDepartmentService, DepartmentService>()
             .AddScoped<IAnnouncmentService, AnnouncmentService>()
             .AddScoped<INotificationService, NotificationService>()
-            .AddScoped<IAudienceNotificationResolverService, AudienceNotificationResolverService>();
+            .AddScoped<IAudienceNotificationResolverService, AudienceNotificationResolverService>()
+            .AddScoped<ISubjectService, SubjectService>()
+            .AddScoped<ISemesterService, SemesterService>()
+            .AddScoped<IFacultyService, FacultyService>()
+            .AddScoped<IGradeService, GradeService>()
+            .AddScoped<IGpaService, GpaService>()
+            .AddScoped<ITranscriptService, TranscriptService>()
+            .AddScoped<IPromotionService, PromotionService>()
+            .AddScoped<IResultLockService, ResultLockService>();
 
     }
 }

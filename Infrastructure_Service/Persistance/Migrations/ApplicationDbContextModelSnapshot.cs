@@ -126,6 +126,12 @@ namespace Infrastructure_Service.Persistance.Migrations
 
                     b.HasKey("EnrollmentId");
 
+                    b.HasIndex("SemesterId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("SubjectId");
+
                     b.ToTable("Enrollments");
                 });
 
@@ -149,6 +155,8 @@ namespace Infrastructure_Service.Persistance.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("FacultyId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Faculties");
                 });
@@ -186,7 +194,39 @@ namespace Infrastructure_Service.Persistance.Migrations
 
                     b.HasKey("GradeId");
 
+                    b.HasIndex("EnrollmentId");
+
                     b.ToTable("Grades");
+                });
+
+            modelBuilder.Entity("Domain_Service.Entities.Academic.ResultLock", b =>
+                {
+                    b.Property<Guid>("ResultLockId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LockedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LockedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Remarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SemesterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ResultLockId");
+
+                    b.ToTable("ResultLocks");
                 });
 
             modelBuilder.Entity("Domain_Service.Entities.Academic.Semester", b =>
@@ -258,9 +298,6 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.Property<Guid>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<float>("GPA")
-                        .HasColumnType("real");
-
                     b.Property<string>("RegistrationNo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -300,8 +337,17 @@ namespace Infrastructure_Service.Persistance.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("FacultyId")
+                    b.Property<int>("CreditHours")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("FacultyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("SemesterId")
                         .HasColumnType("uniqueidentifier");
@@ -312,7 +358,11 @@ namespace Infrastructure_Service.Persistance.Migrations
 
                     b.HasKey("SubjectId");
 
+                    b.HasIndex("DepartmentId");
+
                     b.HasIndex("FacultyId");
+
+                    b.HasIndex("SemesterId");
 
                     b.ToTable("Subjects");
                 });
@@ -875,6 +925,55 @@ namespace Infrastructure_Service.Persistance.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("Domain_Service.Entities.Academic.Enrollment", b =>
+                {
+                    b.HasOne("Domain_Service.Entities.Academic.Semester", "Semester")
+                        .WithMany()
+                        .HasForeignKey("SemesterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain_Service.Entities.Academic.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain_Service.Entities.Academic.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Semester");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("Domain_Service.Entities.Academic.Faculty", b =>
+                {
+                    b.HasOne("Domain_Service.Entities.Identity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain_Service.Entities.Academic.Grade", b =>
+                {
+                    b.HasOne("Domain_Service.Entities.Academic.Enrollment", "Enrollment")
+                        .WithMany()
+                        .HasForeignKey("EnrollmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Enrollment");
+                });
+
             modelBuilder.Entity("Domain_Service.Entities.Academic.Semester", b =>
                 {
                     b.HasOne("Domain_Service.Entities.Academic.Session", "Session")
@@ -888,11 +987,27 @@ namespace Infrastructure_Service.Persistance.Migrations
 
             modelBuilder.Entity("Domain_Service.Entities.Academic.Subject", b =>
                 {
-                    b.HasOne("Domain_Service.Entities.Academic.Faculty", null)
-                        .WithMany("SubjectsTaught")
-                        .HasForeignKey("FacultyId")
+                    b.HasOne("Domain_Service.Entities.Academic.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Domain_Service.Entities.Academic.Faculty", "Faculty")
+                        .WithMany("SubjectsTaught")
+                        .HasForeignKey("FacultyId");
+
+                    b.HasOne("Domain_Service.Entities.Academic.Semester", "Semester")
+                        .WithMany()
+                        .HasForeignKey("SemesterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Faculty");
+
+                    b.Navigation("Semester");
                 });
 
             modelBuilder.Entity("Domain_Service.Entities.FYP.FYPProposal", b =>
